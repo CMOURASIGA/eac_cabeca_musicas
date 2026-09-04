@@ -21,6 +21,22 @@ A carga inicial será formada pelas 41 músicas do PDF `Meu Canto, Minha Fé - B
 ## Documentação
 
 - [Especificação funcional e técnica](docs/ESPECIFICACAO_WEBAPP_LIVRO_DE_MUSICAS_EAC.md)
+- [Status do frontend (telas e lógica core)](docs/STATUS_FRONTEND.md)
+- [Checkpoint: BASE + TXT IMPORT READY](docs/CHECKPOINT_BASE_TXT_IMPORT_READY.md) — Supabase, RLS, autenticação, painel admin e importação real de TXT
+- [Como ligar ao Supabase](docs/SUPABASE_SETUP.md)
+- [Plano da integração com Google Drive](docs/GOOGLE_DRIVE_INTEGRATION_PLAN.md) (ainda não implementada)
+
+## Rodando localmente
+
+```bash
+npm install
+cp .env.example .env.local   # preencha com as chaves do seu projeto Supabase
+npm run dev
+npm test                     # testes do motor de transposição, parser, slug, duplicidade
+```
+
+Sem as variáveis do Supabase preenchidas, o app roda em modo demonstração
+(dados de exemplo, painel admin desabilitado) — ver `docs/SUPABASE_SETUP.md`.
 
 ## Implementação
 
