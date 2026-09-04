@@ -154,6 +154,17 @@ export async function setSongStatus(id: string, status: SongStatus): Promise<voi
   if (error) throw error;
 }
 
+/** Muda o status de várias músicas de uma vez (ex: publicar todos os rascunhos selecionados). */
+export async function setSongsStatusBulk(ids: string[], status: SongStatus): Promise<void> {
+  if (!ids.length) return;
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("eac_songs")
+    .update({ status, published_at: status === "PUBLISHED" ? new Date().toISOString() : null })
+    .in("id", ids);
+  if (error) throw error;
+}
+
 // ── rastreabilidade da importação (import_jobs / import_items) ───────────
 
 export async function createImportJob(): Promise<string> {
