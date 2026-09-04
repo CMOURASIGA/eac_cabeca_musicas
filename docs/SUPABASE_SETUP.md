@@ -12,6 +12,7 @@ ordem**, o conteúdo de cada arquivo:
 1. `supabase/migrations/0001_init_livro_musicas_eac.sql`
 2. `supabase/migrations/0002_seed_categories.sql`
 3. `supabase/migrations/0003_grants.sql`
+4. `supabase/migrations/0004_backfill_profiles.sql`
 
 Cada um está em uma transação (`begin`/`commit`): se algo falhar no meio
 (por exemplo, um nome já existir por outro motivo no seu projeto), nada
@@ -48,6 +49,13 @@ painel administrativo passam pela sessão do usuário logado + RLS.
 > tabela `eac_*`) ao usar o app: falta rodar a `0003_grants.sql` — é uma
 > mensagem de falta de GRANT, diferente de RLS bloqueando por papel. Rode
 > esse arquivo e recarregue a página.
+>
+> Erro `new row violates row-level security policy for table
+> "eac_import_jobs"` (ou qualquer tabela `eac_*`) mesmo logado: a conta que
+> você está usando é anterior à migration 0001, então nunca ganhou uma
+> linha em `eac_profiles` (o gatilho só cria pra contas novas). Rode
+> `0004_backfill_profiles.sql` — aí sim o `update ... set role = 'ADMIN'`
+> do passo 4 encontra a linha e funciona.
 
 ## 3. Desligar o cadastro público de contas
 
