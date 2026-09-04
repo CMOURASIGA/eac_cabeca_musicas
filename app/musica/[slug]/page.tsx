@@ -9,8 +9,27 @@ import { hasDiagram } from "@/lib/chordDiagrams";
 import { useLocalStorageSet } from "@/lib/useLocalStorageSet";
 import { usePublishedSong } from "@/lib/useCatalog";
 
-const FONT_STEPS = [13, 14, 15, 16, 17, 18, 20, 22];
 const SPEED_STEPS = [1, 2, 3, 4, 5];
+const MIN_FONT = 9;
+const MAX_FONT = 26;
+const DEFAULT_FONT = 16;
+// Aproximação da largura de um caractere em fonte monoespaçada, em unidades
+// de font-size (IBM Plex Mono fica perto de 0.6). Usado só para calcular um
+// tamanho de fonte inicial que evite overflow horizontal — nunca corta ou
+// reflui a cifra/letra em si.
+const MONO_CHAR_WIDTH_RATIO = 0.62;
+
+/** Maior tamanho de fonte que cabe em `containerWidth` sem estourar a linha mais longa. */
+function computeFitFontSize(lines: { type: string; content: string }[], containerWidth: number): number {
+  if (!containerWidth) return DEFAULT_FONT;
+  let maxLen = 0;
+  for (const l of lines) {
+    if (l.type === "chord" || l.type === "lyric") maxLen = Math.max(maxLen, l.content.length);
+  }
+  if (!maxLen) return DEFAULT_FONT;
+  const ideal = Math.floor(containerWidth / (maxLen * MONO_CHAR_WIDTH_RATIO));
+  return Math.max(MIN_FONT, Math.min(MAX_FONT, ideal, DEFAULT_FONT));
+}
 
 function pushRecent(slug: string) {
   try {
@@ -29,7 +48,8 @@ export default function SongPage({ params }: { params: { slug: string } }) {
   const selection = useLocalStorageSet("eac:selection");
 
   const [semitones, setSemitones] = useState(0);
-  const [fontStepIndex, setFontStepIndex] = useState(2);
+  const [fontSize, setFontSize] = useState(DEFAULT_FONT);
+  const [userAdjustedFont, setUserAdjustedFont] = useState(false);
   const [dark, setDark] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [speedIndex, setSpeedIndex] = useState(1);
@@ -62,6 +82,26 @@ export default function SongPage({ params }: { params: { slug: string } }) {
 
   const parsed = useMemo(() => (song ? parseSongTxt(song.sourceText) : null), [song]);
 
+  // Ajusta a fonte automaticamente pela linha mais longa da música x largura
+  // real da tela — mobile, tablet e desktop cada um calcula o seu, evitando
+  // overflow horizontal sem precisar de scroll lateral pra ler a letra.
+  useEffect(() => {
+    if (!parsed || !scrollRef.current) return;
+    setUserAdjustedFont(false);
+    const width = scrollRef.current.clientWidth - 32; // padding px-4 dos dois lados
+    setFontSize(computeFitFontSize(parsed.lines, width));
+  }, [parsed]);
+
+  useEffect(() => {
+    function handleResize() {
+      if (userAdjustedFont || !parsed || !scrollRef.current) return;
+      const width = scrollRef.current.clientWidth - 32;
+      setFontSize(computeFitFontSize(parsed.lines, width));
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [parsed, userAdjustedFont]);
+
   if (song === undefined) {
     return <div className="mx-auto max-w-xl px-4 py-16 text-center text-ink-soft">Carregando...</div>;
   }
@@ -80,8 +120,12 @@ export default function SongPage({ params }: { params: { slug: string } }) {
   const currentKey = transposeChord(song.originalKey, semitones);
   const usedChordsOriginal = extractUsedChords(parsed.lines);
   const usedChordsCurrent = usedChordsOriginal.map((c) => transposeChord(c, semitones));
-  const fontSize = FONT_STEPS[fontStepIndex];
   const accent = song.collection === "EAC" ? "text-eac" : "text-missa";
+
+  function adjustFont(delta: number) {
+    setUserAdjustedFont(true);
+    setFontSize((f) => Math.max(MIN_FONT, Math.min(MAX_FONT, f + delta)));
+  }
 
   async function toggleWakeLock() {
     if (wakeLockOn) {
@@ -166,10 +210,8 @@ export default function SongPage({ params }: { params: { slug: string } }) {
         <button onClick={() => setSemitones(0)} className="tool" disabled={semitones === 0}>
           Original
         </button>
-        <button onClick={() => setFontStepIndex((i) => Math.max(0, i - 1))} className="tool">A−</button>
-        <button onClick={() => setFontStepIndex((i) => Math.min(FONT_STEPS.length - 1, i + 1))} className="tool">
-          A+
-        </button>
+        <button onClick={() => adjustFont(-1)} className="tool">A−</button>
+        <button onClick={() => adjustFont(1)} className="tool">A+</button>
         <button onClick={() => setDark((d) => !d)} className="tool">{dark ? "Claro" : "Escuro"}</button>
         <button onClick={toggleFullscreen} className="tool">Tela cheia</button>
         <button onClick={toggleWakeLock} className={`tool ${wakeLockOn ? "!bg-eac !text-white" : ""}`}>
