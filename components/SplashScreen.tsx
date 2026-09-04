@@ -23,7 +23,7 @@ export default function SplashScreen() {
     if (alreadyShown) return;
 
     setVisible(true);
-    const fadeTimer = setTimeout(() => setFading(true), 1100);
+    const fadeTimer = setTimeout(() => setFading(true), 2400);
     const hideTimer = setTimeout(() => {
       setVisible(false);
       try {
@@ -31,7 +31,7 @@ export default function SplashScreen() {
       } catch {
         // ok não persistir — só volta a aparecer em navegações futuras
       }
-    }, 1500);
+    }, 3000);
 
     return () => {
       clearTimeout(fadeTimer);
@@ -53,13 +53,13 @@ export default function SplashScreen() {
       <img
         src="/logo.png"
         alt=""
-        width={112}
-        height={112}
-        className="h-28 w-28 rounded-[22%] shadow-[0_20px_60px_rgba(0,0,0,0.45)] animate-[eac-splash-in_0.7s_ease-out] motion-reduce:animate-none"
+        width={208}
+        height={208}
+        className="h-52 w-52 max-w-[62vw] max-h-[62vw] rounded-[18%] shadow-[0_24px_70px_rgba(0,0,0,0.5)] animate-[eac-splash-in_1s_ease-out] motion-reduce:animate-none"
       />
-      <div className="text-center animate-[eac-splash-in_0.7s_ease-out_0.15s_backwards] motion-reduce:animate-none">
-        <div className="font-serif text-lg font-semibold text-gold">Meu Canto, Minha Fé</div>
-        <div className="text-[11px] uppercase tracking-[0.2em] text-white/55 mt-1">Livro de Músicas EAC</div>
+      <div className="text-center animate-[eac-splash-in_1s_ease-out_0.2s_backwards] motion-reduce:animate-none">
+        <div className="font-serif text-xl font-semibold text-gold">Meu Canto, Minha Fé</div>
+        <div className="text-xs uppercase tracking-[0.2em] text-white/55 mt-1.5">Livro de Músicas EAC</div>
       </div>
     </div>
   );

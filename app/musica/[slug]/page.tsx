@@ -5,7 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import DemoBanner from "@/components/DemoBanner";
 import { parseSongTxt, extractUsedChords } from "@/lib/parseSongTxt";
 import { transposeChord, transposeChordLine } from "@/lib/transpose";
-import { hasDiagram } from "@/lib/chordDiagrams";
+import ChordDiagram from "@/components/ChordDiagram";
+import { getChordShape } from "@/lib/chordDiagrams";
 import { useLocalStorageSet } from "@/lib/useLocalStorageSet";
 import { usePublishedSong } from "@/lib/useCatalog";
 
@@ -295,21 +296,26 @@ export default function SongPage({ params }: { params: { slug: string } }) {
         {usedChordsCurrent.length === 0 && (
           <span className="text-xs text-ink-faint">Nenhum acorde detectado nesta música.</span>
         )}
-        {usedChordsCurrent.map((chord, i) => (
-          <div key={`${chord}-${i}`} className="flex flex-col items-center gap-1 shrink-0 w-14">
-            {hasDiagram(chord) ? (
-              <div className="h-13 w-11 rounded border border-ink-faint bg-white" style={{ height: 52 }} />
-            ) : (
-              <div
-                className="h-13 w-11 rounded border border-dashed border-ink-faint bg-white grid place-items-center text-center text-[8px] text-ink-faint px-0.5"
-                style={{ height: 52 }}
-              >
-                sem diagrama
-              </div>
-            )}
-            <span className="text-[11px] font-bold">{chord}</span>
-          </div>
-        ))}
+        {usedChordsCurrent.map((chord, i) => {
+          const shape = getChordShape(chord);
+          return (
+            <div key={`${chord}-${i}`} className="flex flex-col items-center gap-1 shrink-0 w-14">
+              {shape ? (
+                <div className="rounded border border-ink-faint bg-white text-ink" style={{ height: 52, width: 44 }}>
+                  <ChordDiagram shape={shape} />
+                </div>
+              ) : (
+                <div
+                  className="rounded border border-dashed border-ink-faint bg-white grid place-items-center text-center text-[8px] text-ink-faint px-0.5"
+                  style={{ height: 52, width: 44 }}
+                >
+                  sem diagrama
+                </div>
+              )}
+              <span className="text-[11px] font-bold">{chord}</span>
+            </div>
+          );
+        })}
       </div>
       <div className="text-center text-[10px] text-ink-faint bg-paper-alt dark:bg-dark-surface pb-3">
         {song.version} · atualizado em {new Date(song.updatedAt).toLocaleDateString("pt-BR")}
