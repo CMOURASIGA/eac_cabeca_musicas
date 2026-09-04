@@ -6,20 +6,27 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        paper: "#F8F5EC",
-        "paper-alt": "#F3F0E7",
+        // paleta extraída do brasão oficial ("logo nova.jpg"): azul-marinho
+        // quase preto, dourado do bordado, creme das letras e vermelho do coração
+        paper: "#FAF6EA",
+        "paper-alt": "#F1E9D3",
         ink: "#11202B",
         "ink-soft": "#4C5A62",
         "ink-faint": "#8B969C",
-        border: "#DAD4C2",
+        border: "#E4D9B9",
         eac: {
-          DEFAULT: "#014373",
-          deep: "#002A59",
-          soft: "#DCE7EE",
+          DEFAULT: "#0F1B33",
+          deep: "#060B18",
+          soft: "#E3E7ED",
+        },
+        gold: {
+          DEFAULT: "#C9A76B",
+          deep: "#A9843F",
+          soft: "#F3EAD3",
         },
         red: {
-          DEFAULT: "#D01528",
-          soft: "#F6D9DC",
+          DEFAULT: "#C81F2C",
+          soft: "#F6DEDF",
         },
         missa: {
           DEFAULT: "#5A4B78",

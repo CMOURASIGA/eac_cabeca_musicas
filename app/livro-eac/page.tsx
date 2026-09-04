@@ -32,7 +32,7 @@ function CatalogEAC() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6 space-y-5">
-      <div className="rounded-2xl p-5 text-white" style={{ background: "#014373" }}>
+      <div className="rounded-2xl p-5 text-white" style={{ background: "#0F1B33" }}>
         <h1 className="font-serif text-xl font-semibold">Livro EAC</h1>
         <p className="text-sm opacity-85">{songs.length} música(s) publicada(s) · Cabeça</p>
       </div>

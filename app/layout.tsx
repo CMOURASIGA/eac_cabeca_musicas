@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Lora, Work_Sans, IBM_Plex_Mono } from "next/font/google";
 import Header from "@/components/Header";
+import SplashScreen from "@/components/SplashScreen";
 import "./globals.css";
 
 const lora = Lora({ subsets: ["latin"], variable: "--font-serif", weight: ["500", "600", "700"] });
@@ -14,13 +15,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#014373",
+  themeColor: "#0F1B33",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${lora.variable} ${workSans.variable} ${plexMono.variable}`}>
       <body className="font-sans min-h-screen flex flex-col">
+        <SplashScreen />
         <Header />
         <main className="flex-1">{children}</main>
       </body>

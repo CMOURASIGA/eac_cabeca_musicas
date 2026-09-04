@@ -43,7 +43,7 @@ export default function HomePage() {
         <Link
           href="/livro-eac"
           className="rounded-2xl p-6 min-h-[120px] flex flex-col justify-between text-white"
-          style={{ background: "linear-gradient(135deg, #014373 0%, #002A59 100%)" }}
+          style={{ background: "linear-gradient(135deg, #0F1B33 0%, #060B18 100%)" }}
         >
           <div>
             <div className="text-xs uppercase tracking-wider opacity-85">Cabeça</div>
