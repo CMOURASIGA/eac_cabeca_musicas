@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import DemoBanner from "@/components/DemoBanner";
+import ErrorBanner from "@/components/ErrorBanner";
 import { useLocalStorageSet } from "@/lib/useLocalStorageSet";
 import { useAllPublishedSongs } from "@/lib/useCatalog";
 
 export default function SelecaoPage() {
   const selection = useLocalStorageSet("eac:selection");
-  const { songs: allSongs, usingSampleData } = useAllPublishedSongs();
+  const { songs: allSongs, usingSampleData, error: catalogError } = useAllPublishedSongs();
   const [pdfMsg, setPdfMsg] = useState<string | null>(null);
   const songs = selection.ids.map((id) => allSongs.find((s) => s.id === id)).filter((s): s is (typeof allSongs)[number] => Boolean(s));
 
@@ -23,6 +24,7 @@ export default function SelecaoPage() {
       </div>
 
       {usingSampleData && <DemoBanner />}
+      {catalogError && <ErrorBanner message={catalogError} />}
 
       {!songs.length && (
         <p className="text-sm text-ink-soft rounded-xl border border-dashed border-border p-4">

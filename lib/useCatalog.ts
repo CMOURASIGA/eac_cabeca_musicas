@@ -18,11 +18,18 @@ const SAMPLE_BY_COLLECTION: Record<Collection, UiSong[]> = {
 };
 const SAMPLE_ALL = [...SAMPLE_BY_COLLECTION.EAC, ...SAMPLE_BY_COLLECTION.MISSA];
 
+const QUERY_ERROR_MESSAGE =
+  "Não foi possível carregar o catálogo agora. O Supabase está configurado, mas a consulta falhou — " +
+  "isso não é modo demonstração, é um erro real (rede, RLS ou configuração). Tente recarregar a página.";
+
 /**
- * Todos os hooks abaixo seguem o mesmo padrão: se o Supabase estiver
- * configurado, buscam de verdade (RLS já filtra para PUBLISHED); se não
- * estiver configurado, ou se a busca falhar, caem para lib/sampleData.ts
- * com um aviso — nunca quebram a tela, só avisam que é modo demonstração.
+ * Regra importante: dados de exemplo (lib/sampleData.ts) só aparecem quando
+ * o Supabase NÃO está configurado (NEXT_PUBLIC_SUPABASE_URL/ANON_KEY
+ * ausentes) — isso é "modo demonstração" de propósito. Quando ESTÁ
+ * configurado e a consulta falha de verdade, isso nunca vira dado de
+ * exemplo silenciosamente: fica um erro visível (`error`), porque mascarar
+ * uma falha real de Supabase/RLS como se fosse conteúdo válido esconderia
+ * o problema em vez de expor.
  */
 
 export function useCatalog(collection: Collection) {
@@ -31,24 +38,25 @@ export function useCatalog(collection: Collection) {
   );
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [loading, setLoading] = useState(isSupabaseConfigured);
-  const [usingSampleData, setUsingSampleData] = useState(!isSupabaseConfigured);
+  const [error, setError] = useState<string | null>(null);
+  const usingSampleData = !isSupabaseConfigured;
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
     let alive = true;
     setLoading(true);
+    setError(null);
     Promise.all([fetchPublishedSongs(collection), fetchCategories(collection)])
       .then(([songsData, categoriesData]) => {
         if (!alive) return;
         setSongs(songsData);
         setCategories(categoriesData);
-        setUsingSampleData(false);
       })
       .catch((err) => {
-        console.error("Supabase indisponível, usando catálogo de exemplo:", err);
+        console.error("Falha real na consulta ao Supabase (não é modo demonstração):", err);
         if (!alive) return;
-        setSongs(SAMPLE_BY_COLLECTION[collection]);
-        setUsingSampleData(true);
+        setSongs([]);
+        setError(QUERY_ERROR_MESSAGE);
       })
       .finally(() => alive && setLoading(false));
     return () => {
@@ -56,12 +64,13 @@ export function useCatalog(collection: Collection) {
     };
   }, [collection]);
 
-  return { songs, categories, loading, usingSampleData };
+  return { songs, categories, loading, usingSampleData, error };
 }
 
 export function useAllPublishedSongs() {
   const [songs, setSongs] = useState<UiSong[]>(() => (isSupabaseConfigured ? [] : SAMPLE_ALL));
-  const [usingSampleData, setUsingSampleData] = useState(!isSupabaseConfigured);
+  const [error, setError] = useState<string | null>(null);
+  const usingSampleData = !isSupabaseConfigured;
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -70,53 +79,51 @@ export function useAllPublishedSongs() {
       .then((data) => {
         if (!alive) return;
         setSongs(data);
-        setUsingSampleData(false);
+        setError(null);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Falha real na consulta ao Supabase (não é modo demonstração):", err);
         if (!alive) return;
-        setSongs(SAMPLE_ALL);
-        setUsingSampleData(true);
+        setSongs([]);
+        setError(QUERY_ERROR_MESSAGE);
       });
     return () => {
       alive = false;
     };
   }, []);
 
-  return { songs, usingSampleData };
+  return { songs, usingSampleData, error };
 }
 
-/** `song === undefined` enquanto carrega, `null` quando não existe/não está publicada. */
+/** `song === undefined` enquanto carrega, `null` quando não existe/não está publicada (não é erro). */
 export function usePublishedSong(slug: string) {
   const sampleFallback = () => SAMPLE_ALL.find((s) => s.slug === slug) ?? null;
   const [song, setSong] = useState<UiSong | null | undefined>(() =>
     isSupabaseConfigured ? undefined : sampleFallback()
   );
-  const [usingSampleData, setUsingSampleData] = useState(!isSupabaseConfigured);
+  const [error, setError] = useState<string | null>(null);
+  const usingSampleData = !isSupabaseConfigured;
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
     let alive = true;
     setSong(undefined);
+    setError(null);
     fetchPublishedSongBySlug(slug)
       .then((data) => {
         if (!alive) return;
-        if (data) {
-          setSong(data);
-          setUsingSampleData(false);
-        } else {
-          setSong(sampleFallback());
-          setUsingSampleData(true);
-        }
+        setSong(data); // null = não encontrada/não publicada, estado legítimo, não é erro
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Falha real na consulta ao Supabase (não é modo demonstração):", err);
         if (!alive) return;
-        setSong(sampleFallback());
-        setUsingSampleData(true);
+        setSong(null);
+        setError(QUERY_ERROR_MESSAGE);
       });
     return () => {
       alive = false;
     };
   }, [slug]);
 
-  return { song, usingSampleData };
+  return { song, usingSampleData, error };
 }

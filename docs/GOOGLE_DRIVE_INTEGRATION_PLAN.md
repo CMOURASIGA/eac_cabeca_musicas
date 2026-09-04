@@ -3,7 +3,7 @@
 Por decisão explícita, esta integração só entra depois que a persistência
 (Supabase) e a importação manual de TXT estiverem estáveis em produção.
 Este documento existe para não perder o desenho da solução até lá, e para
-deixar claro o requisito principal: **o `manifest.csv` é só auxiliar,
+deixar claro o requisito principal: **o `manifest.json` é só auxiliar,
 nunca a fonte da verdade** — novos `.txt` devem ser descobertos direto na
 pasta do Drive, sem exigir que alguém atualize um manifesto manualmente.
 
@@ -22,7 +22,7 @@ pasta do Drive, sem exigir que alguém atualize um manifesto manualmente.
    navegação do admin, hoje sem ação).
 3. Backend consulta a pasta via Google Drive API (`files.list`), listando
    **todos os arquivos `.txt` da pasta diretamente** — nunca a partir de
-   um `manifest.csv`. Se um `manifest.csv` existir na pasta, ele só serve
+   um `manifest.json`. Se um `manifest.json` existir na pasta, ele só serve
    como metadado auxiliar opcional (ex: sugestão de número/coleção por
    nome de arquivo) para pré-preencher campos — nunca como lista de quais
    arquivos existem. Um `.txt` novo tem que aparecer mesmo que ninguém

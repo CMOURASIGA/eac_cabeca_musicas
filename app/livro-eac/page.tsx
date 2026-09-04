@@ -4,6 +4,7 @@ import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import SongCard from "@/components/SongCard";
 import DemoBanner from "@/components/DemoBanner";
+import ErrorBanner from "@/components/ErrorBanner";
 import { useCatalog } from "@/lib/useCatalog";
 import { matchesQuery } from "@/lib/search";
 
@@ -11,7 +12,7 @@ function CatalogEAC() {
   const params = useSearchParams();
   const [query, setQuery] = useState(params.get("q") ?? "");
   const [category, setCategory] = useState("Todas");
-  const { songs, categories, loading, usingSampleData } = useCatalog("EAC");
+  const { songs, categories, loading, usingSampleData, error } = useCatalog("EAC");
 
   const categoryNames = useMemo(
     () => ["Todas", ...(categories.length ? categories.map((c) => c.name) : Array.from(new Set(songs.map((s) => s.category))))],
@@ -38,6 +39,7 @@ function CatalogEAC() {
       </div>
 
       {usingSampleData && <DemoBanner />}
+      {error && <ErrorBanner message={error} />}
 
       <input
         value={query}

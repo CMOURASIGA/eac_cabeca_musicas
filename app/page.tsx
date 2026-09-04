@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import SongCard from "@/components/SongCard";
 import DemoBanner from "@/components/DemoBanner";
+import ErrorBanner from "@/components/ErrorBanner";
 import { useLocalStorageSet } from "@/lib/useLocalStorageSet";
 import { useAllPublishedSongs } from "@/lib/useCatalog";
 
 export default function HomePage() {
   const favorites = useLocalStorageSet("eac:favorites");
   const selection = useLocalStorageSet("eac:selection");
-  const { songs: allSongs, usingSampleData } = useAllPublishedSongs();
+  const { songs: allSongs, usingSampleData, error: catalogError } = useAllPublishedSongs();
   const [recentSlugs, setRecentSlugs] = useState<string[]>([]);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
 
@@ -39,6 +40,15 @@ export default function HomePage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:py-10 space-y-10">
       {usingSampleData && <DemoBanner />}
+      {catalogError && <ErrorBanner message={catalogError} />}
+
+      <div className="flex items-center gap-2 -mb-2">
+        <span className="h-1.5 w-1.5 rounded-full bg-red" />
+        <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">
+          Firmes na fé, unidos no amor — Banda EAC
+        </p>
+      </div>
+
       <section className="grid gap-4 sm:grid-cols-2">
         <Link
           href="/livro-eac"

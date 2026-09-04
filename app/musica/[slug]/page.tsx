@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import DemoBanner from "@/components/DemoBanner";
+import ErrorBanner from "@/components/ErrorBanner";
 import { parseSongTxt, extractUsedChords } from "@/lib/parseSongTxt";
 import { transposeChord, transposeChordLine } from "@/lib/transpose";
 import ChordDiagram from "@/components/ChordDiagram";
@@ -44,7 +45,7 @@ function pushRecent(slug: string) {
 }
 
 export default function SongPage({ params }: { params: { slug: string } }) {
-  const { song, usingSampleData } = usePublishedSong(params.slug);
+  const { song, usingSampleData, error } = usePublishedSong(params.slug);
   const favorites = useLocalStorageSet("eac:favorites");
   const selection = useLocalStorageSet("eac:selection");
 
@@ -56,6 +57,9 @@ export default function SongPage({ params }: { params: { slug: string } }) {
   const [speedIndex, setSpeedIndex] = useState(1);
   const [wakeLockOn, setWakeLockOn] = useState(false);
   const [shareMsg, setShareMsg] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [favPulse, setFavPulse] = useState(false);
+  const [selPulse, setSelPulse] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const wakeLockRef = useRef<any>(null);
 
@@ -109,9 +113,9 @@ export default function SongPage({ params }: { params: { slug: string } }) {
 
   if (!song || !parsed) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-16 text-center">
-        <p className="text-ink-soft">Música não encontrada (ou ainda não publicada).</p>
-        <Link href="/livro-eac" className="text-eac font-semibold text-sm">
+      <div className="mx-auto max-w-xl px-4 py-16 text-center space-y-3">
+        {error ? <ErrorBanner message={error} /> : <p className="text-ink-soft">Música não encontrada (ou ainda não publicada).</p>}
+        <Link href="/livro-eac" className="text-eac font-semibold text-sm block">
           Voltar ao catálogo
         </Link>
       </div>
@@ -126,6 +130,18 @@ export default function SongPage({ params }: { params: { slug: string } }) {
   function adjustFont(delta: number) {
     setUserAdjustedFont(true);
     setFontSize((f) => Math.max(MIN_FONT, Math.min(MAX_FONT, f + delta)));
+  }
+
+  function toggleFavorite() {
+    favorites.toggle(song!.id);
+    setFavPulse(true);
+    setTimeout(() => setFavPulse(false), 320);
+  }
+
+  function toggleSelection() {
+    selection.toggle(song!.id);
+    setSelPulse(true);
+    setTimeout(() => setSelPulse(false), 320);
   }
 
   async function toggleWakeLock() {
@@ -174,73 +190,127 @@ export default function SongPage({ params }: { params: { slug: string } }) {
 
   return (
     <div className="mx-auto max-w-3xl flex flex-col min-h-[calc(100dvh-57px)]">
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-white dark:bg-dark-surface dark:border-dark-border sticky top-[57px] z-10">
+      {/* Cabeçalho: título bem claro, sem disputar espaço com controles */}
+      <div className="flex items-center gap-3 px-4 pt-3 pb-2 bg-white dark:bg-dark-surface sticky top-[57px] z-10">
         <Link
           href={song.collection === "EAC" ? "/livro-eac" : "/missa"}
           aria-label="Voltar"
-          className="grid h-8 w-8 place-items-center rounded-md border border-border shrink-0"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border text-lg"
         >
           ←
         </Link>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             {song.number && (
-              <span className={`text-[10.5px] font-bold rounded px-1.5 py-0.5 ${accent} bg-eac-soft`}>
+              <span className={`text-[11px] font-bold rounded px-1.5 py-0.5 ${accent} bg-eac-soft shrink-0`}>
                 {song.number}
               </span>
             )}
-            <h1 className="font-serif text-base font-semibold truncate">{song.title}</h1>
+            <h1 className="font-serif text-lg font-bold truncate leading-tight">{song.title}</h1>
           </div>
           <p className="text-[11px] text-ink-soft dark:text-ink-faint">
-            {song.collection === "EAC" ? "Livro EAC" : "Músicas de Missa"} · Tom atual: {currentKey}
-            {semitones !== 0 && ` (original: ${song.originalKey})`}
+            {song.collection === "EAC" ? "Livro EAC" : "Músicas de Missa"}
           </p>
         </div>
       </div>
 
       {usingSampleData && (
-        <div className="px-4 pt-2">
+        <div className="px-4 pb-2">
           <DemoBanner />
         </div>
       )}
+      {error && (
+        <div className="px-4 pb-2">
+          <ErrorBanner message={error} />
+        </div>
+      )}
 
-      <div className="flex gap-2 overflow-x-auto px-4 py-2.5 border-b border-border bg-white dark:bg-dark-surface dark:border-dark-border text-xs font-semibold">
-        <button onClick={() => setSemitones((s) => s - 1)} className="tool">− Tom</button>
-        <span className="tool !font-bold">{currentKey}</span>
-        <button onClick={() => setSemitones((s) => s + 1)} className="tool">Tom +</button>
-        <button onClick={() => setSemitones(0)} className="tool" disabled={semitones === 0}>
-          Original
-        </button>
-        <button onClick={() => adjustFont(-1)} className="tool">A−</button>
-        <button onClick={() => adjustFont(1)} className="tool">A+</button>
-        <button onClick={() => setDark((d) => !d)} className="tool">{dark ? "Claro" : "Escuro"}</button>
-        <button onClick={toggleFullscreen} className="tool">Tela cheia</button>
-        <button onClick={toggleWakeLock} className={`tool ${wakeLockOn ? "!bg-eac !text-white" : ""}`}>
-          Tela acordada
-        </button>
+      {/* Barra principal: tom, transposição, favoritar e seleção — grandes, uma mão só */}
+      <div className="flex items-center gap-2.5 px-4 pb-3 border-b border-border bg-white dark:bg-dark-surface dark:border-dark-border sticky top-[105px] z-10">
         <button
-          onClick={() => favorites.toggle(song.id)}
-          className={`tool ${favorites.has(song.id) ? "!text-red !border-red" : ""}`}
+          onClick={() => setSemitones((s) => s - 1)}
+          aria-label="Transpor um tom abaixo"
+          className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border-2 border-eac text-2xl font-bold text-eac active:scale-95 transition-transform dark:border-white dark:text-white"
         >
-          {favorites.has(song.id) ? "♥ Favorito" : "♡ Favoritar"}
+          −
         </button>
+        <div className="flex flex-col items-center justify-center px-1 min-w-[52px]">
+          <span className="font-serif text-2xl font-extrabold leading-none text-eac dark:text-white">{currentKey}</span>
+          <span className="text-[9px] uppercase tracking-wide text-ink-faint mt-0.5">tom atual</span>
+        </div>
         <button
-          onClick={() => selection.toggle(song.id)}
-          className={`tool ${selection.has(song.id) ? "!bg-eac !text-white" : ""}`}
+          onClick={() => setSemitones((s) => s + 1)}
+          aria-label="Transpor um tom acima"
+          className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border-2 border-eac text-2xl font-bold text-eac active:scale-95 transition-transform dark:border-white dark:text-white"
         >
-          {selection.has(song.id) ? "✓ Na seleção" : "+ Seleção"}
+          +
         </button>
-        <button
-          onClick={() => {
-            setShareMsg("Geração de PDF chega na Fase 2 (repertórios e PDF).");
-            setTimeout(() => setShareMsg(null), 2500);
-          }}
-          className="tool"
-        >
-          Gerar PDF
-        </button>
-        <button onClick={share} className="tool">Compartilhar</button>
+
+        {semitones !== 0 && (
+          <button
+            onClick={() => setSemitones(0)}
+            className="shrink-0 flex items-center gap-1 rounded-full bg-gold-soft border border-gold px-2.5 py-1.5 text-[11px] font-bold text-gold-deep"
+          >
+            ↺ Original ({song.originalKey})
+          </button>
+        )}
+
+        <div className="ml-auto flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={toggleFavorite}
+            aria-label={favorites.has(song.id) ? "Remover dos favoritos" : "Favoritar"}
+            aria-pressed={favorites.has(song.id)}
+            className={`grid h-11 w-11 place-items-center rounded-full border-2 text-xl transition-transform ${
+              favPulse ? "animate-[eac-pop_0.32s_ease]" : ""
+            } ${favorites.has(song.id) ? "border-red text-red" : "border-border text-ink-faint"}`}
+          >
+            {favorites.has(song.id) ? "♥" : "♡"}
+          </button>
+          <button
+            onClick={toggleSelection}
+            aria-label={selection.has(song.id) ? "Remover da seleção" : "Adicionar à seleção"}
+            aria-pressed={selection.has(song.id)}
+            className={`grid h-11 w-11 place-items-center rounded-full border-2 text-lg font-bold transition-transform ${
+              selPulse ? "animate-[eac-pop_0.32s_ease]" : ""
+            } ${selection.has(song.id) ? "border-eac bg-eac text-white" : "border-border text-ink-faint"}`}
+          >
+            {selection.has(song.id) ? "✓" : "+"}
+          </button>
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label="Mais opções"
+            aria-expanded={menuOpen}
+            className={`grid h-11 w-11 place-items-center rounded-full border-2 text-lg ${
+              menuOpen ? "border-eac text-eac" : "border-border text-ink-faint"
+            }`}
+          >
+            ⋯
+          </button>
+        </div>
       </div>
+
+      {/* Controles secundários: escondidos por padrão pra não disputar atenção durante a execução */}
+      {menuOpen && (
+        <div className="flex flex-wrap gap-2 px-4 py-3 border-b border-border bg-paper-alt dark:bg-dark-surface dark:border-dark-border text-xs font-semibold">
+          <button onClick={() => adjustFont(-1)} className="tool">A−</button>
+          <button onClick={() => adjustFont(1)} className="tool">A+</button>
+          <button onClick={() => setDark((d) => !d)} className="tool">{dark ? "Modo claro" : "Modo escuro"}</button>
+          <button onClick={toggleFullscreen} className="tool">Tela cheia</button>
+          <button onClick={toggleWakeLock} className={`tool ${wakeLockOn ? "!bg-eac !text-white" : ""}`}>
+            {wakeLockOn ? "✓ Tela acordada" : "Tela acordada"}
+          </button>
+          <button
+            onClick={() => {
+              setShareMsg("Geração de PDF chega na Fase 2 (repertórios e PDF).");
+              setTimeout(() => setShareMsg(null), 2500);
+            }}
+            className="tool"
+          >
+            Gerar PDF
+          </button>
+          <button onClick={share} className="tool">Compartilhar</button>
+        </div>
+      )}
 
       {shareMsg && (
         <div className="mx-4 mt-2 rounded-lg bg-ink text-white text-xs font-semibold px-3 py-2 self-start">

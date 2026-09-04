@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import SongCard from "@/components/SongCard";
 import DemoBanner from "@/components/DemoBanner";
+import ErrorBanner from "@/components/ErrorBanner";
 import { MISSA_CATEGORIES } from "@/lib/sampleData";
 import { useCatalog } from "@/lib/useCatalog";
 import { matchesQuery } from "@/lib/search";
@@ -11,7 +12,7 @@ import type { UiSong } from "@/lib/uiSong";
 export default function MissaPage() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todas");
-  const { songs, categories, loading, usingSampleData } = useCatalog("MISSA");
+  const { songs, categories, loading, usingSampleData, error } = useCatalog("MISSA");
 
   const categoryNames = categories.length ? categories.map((c) => c.name) : MISSA_CATEGORIES;
 
@@ -39,6 +40,7 @@ export default function MissaPage() {
       </div>
 
       {usingSampleData && <DemoBanner />}
+      {error && <ErrorBanner message={error} />}
 
       <input
         value={query}

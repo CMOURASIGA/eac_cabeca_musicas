@@ -92,7 +92,7 @@ automatizados, como combinado.
 
 ### 7. Preparação da integração com Google Drive (não implementada)
 `docs/GOOGLE_DRIVE_INTEGRATION_PLAN.md` — fluxo completo desenhado,
-reforçando que o `manifest.csv` é só auxiliar (novos `.txt` têm que ser
+reforçando que o `manifest.json` é só auxiliar (novos `.txt` têm que ser
 descobertos direto na pasta, nunca dependendo de alguém atualizar um
 manifesto). Schema já tem os campos necessários (`source_type = 'DRIVE'`,
 `source_file_id`) para quando isso entrar — sem precisar de nova
