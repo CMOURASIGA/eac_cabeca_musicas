@@ -3,32 +3,41 @@
 import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import SongCard from "@/components/SongCard";
-import { EAC_SONGS } from "@/lib/sampleData";
+import DemoBanner from "@/components/DemoBanner";
+import { useCatalog } from "@/lib/useCatalog";
 import { matchesQuery } from "@/lib/search";
-
-const CATEGORIES = ["Todas", ...Array.from(new Set(EAC_SONGS.map((s) => s.category)))];
 
 function CatalogEAC() {
   const params = useSearchParams();
   const [query, setQuery] = useState(params.get("q") ?? "");
   const [category, setCategory] = useState("Todas");
+  const { songs, categories, loading, usingSampleData } = useCatalog("EAC");
 
-  const songs = useMemo(
+  const categoryNames = useMemo(
+    () => ["Todas", ...(categories.length ? categories.map((c) => c.name) : Array.from(new Set(songs.map((s) => s.category))))],
+    [categories, songs]
+  );
+
+  const filtered = useMemo(
     () =>
-      EAC_SONGS.filter(
-        (s) =>
-          (category === "Todas" || s.category === category) &&
-          (matchesQuery(s.title, query) || String(s.number).includes(query))
-      ).sort((a, b) => (a.number ?? 0) - (b.number ?? 0)),
-    [query, category]
+      songs
+        .filter(
+          (s) =>
+            (category === "Todas" || s.category === category) &&
+            (matchesQuery(s.title, query) || matchesQuery(s.sourceText, query) || String(s.number ?? "").includes(query))
+        )
+        .sort((a, b) => (a.number ?? 0) - (b.number ?? 0)),
+    [songs, query, category]
   );
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6 space-y-5">
       <div className="rounded-2xl p-5 text-white" style={{ background: "#014373" }}>
         <h1 className="font-serif text-xl font-semibold">Livro EAC</h1>
-        <p className="text-sm opacity-85">{EAC_SONGS.length} músicas · Cabeça</p>
+        <p className="text-sm opacity-85">{songs.length} música(s) publicada(s) · Cabeça</p>
       </div>
+
+      {usingSampleData && <DemoBanner />}
 
       <input
         value={query}
@@ -38,7 +47,7 @@ function CatalogEAC() {
       />
 
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {CATEGORIES.map((c) => (
+        {categoryNames.map((c) => (
           <button
             key={c}
             onClick={() => setCategory(c)}
@@ -52,10 +61,9 @@ function CatalogEAC() {
       </div>
 
       <div className="space-y-2">
-        {songs.map((s) => (
-          <SongCard key={s.id} song={s} />
-        ))}
-        {!songs.length && <p className="text-sm text-ink-soft">Nenhuma música encontrada.</p>}
+        {loading && <p className="text-sm text-ink-soft">Carregando...</p>}
+        {!loading && filtered.map((s) => <SongCard key={s.id} song={s} />)}
+        {!loading && !filtered.length && <p className="text-sm text-ink-soft">Nenhuma música encontrada.</p>}
       </div>
     </div>
   );
@@ -63,7 +71,7 @@ function CatalogEAC() {
 
 export default function LivroEacPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="mx-auto max-w-3xl px-4 py-6 text-sm text-ink-soft">Carregando...</div>}>
       <CatalogEAC />
     </Suspense>
   );

@@ -1,11 +1,17 @@
 /**
- * Dados de EXEMPLO para desenvolvimento/validação da interface.
+ * Dados de EXEMPLO — não são mais a fonte do catálogo público (isso agora é
+ * o Supabase, ver lib/supabase/publicQueries.ts e lib/useCatalog.ts).
+ *
+ * Este arquivo só é usado em dois lugares, de propósito:
+ * 1. testes automatizados (lib/*.test.ts);
+ * 2. fallback de "modo demonstração" quando o Supabase não está configurado
+ *    ou está fora do ar, para a interface nunca ficar em branco.
  *
  * Não são as 41 músicas reais do PDF "Meu Canto, Minha Fé - Banda EAC
- * Porciúncula" — esse catálogo real entra pela importação de TXT (painel
- * admin, Fase 1/3 da especificação). O texto de "Somos Luz" abaixo é o
- * mesmo conteúdo fictício usado no esboço de aprovação, só para exercitar
- * o parser/motor de transposição/tela da música ponta a ponta.
+ * Porciúncula" — esse catálogo real entra pela importação de TXT no painel
+ * admin. O texto de "Somos Luz" abaixo é o mesmo conteúdo fictício usado no
+ * esboço de aprovação, só para exercitar o parser/motor de transposição
+ * ponta a ponta.
  */
 export type Collection = "EAC" | "MISSA";
 

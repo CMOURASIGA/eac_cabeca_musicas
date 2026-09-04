@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { findSongBySlug } from "@/lib/sampleData";
+import DemoBanner from "@/components/DemoBanner";
 import { parseSongTxt, extractUsedChords } from "@/lib/parseSongTxt";
-import { transposeChord, transposeChordLine, semitonesBetween } from "@/lib/transpose";
+import { transposeChord, transposeChordLine } from "@/lib/transpose";
 import { hasDiagram } from "@/lib/chordDiagrams";
 import { useLocalStorageSet } from "@/lib/useLocalStorageSet";
+import { usePublishedSong } from "@/lib/useCatalog";
 
 const FONT_STEPS = [13, 14, 15, 16, 17, 18, 20, 22];
 const SPEED_STEPS = [1, 2, 3, 4, 5];
@@ -23,7 +24,7 @@ function pushRecent(slug: string) {
 }
 
 export default function SongPage({ params }: { params: { slug: string } }) {
-  const song = findSongBySlug(params.slug);
+  const { song, usingSampleData } = usePublishedSong(params.slug);
   const favorites = useLocalStorageSet("eac:favorites");
   const selection = useLocalStorageSet("eac:selection");
 
@@ -59,12 +60,16 @@ export default function SongPage({ params }: { params: { slug: string } }) {
     };
   }, []);
 
-  const parsed = useMemo(() => (song ? parseSongTxt(song.txt) : null), [song]);
+  const parsed = useMemo(() => (song ? parseSongTxt(song.sourceText) : null), [song]);
+
+  if (song === undefined) {
+    return <div className="mx-auto max-w-xl px-4 py-16 text-center text-ink-soft">Carregando...</div>;
+  }
 
   if (!song || !parsed) {
     return (
       <div className="mx-auto max-w-xl px-4 py-16 text-center">
-        <p className="text-ink-soft">Música não encontrada.</p>
+        <p className="text-ink-soft">Música não encontrada (ou ainda não publicada).</p>
         <Link href="/livro-eac" className="text-eac font-semibold text-sm">
           Voltar ao catálogo
         </Link>
@@ -147,6 +152,12 @@ export default function SongPage({ params }: { params: { slug: string } }) {
           </p>
         </div>
       </div>
+
+      {usingSampleData && (
+        <div className="px-4 pt-2">
+          <DemoBanner />
+        </div>
+      )}
 
       <div className="flex gap-2 overflow-x-auto px-4 py-2.5 border-b border-border bg-white dark:bg-dark-surface dark:border-dark-border text-xs font-semibold">
         <button onClick={() => setSemitones((s) => s - 1)} className="tool">− Tom</button>

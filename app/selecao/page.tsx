@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { EAC_SONGS, MISSA_SONGS } from "@/lib/sampleData";
+import DemoBanner from "@/components/DemoBanner";
 import { useLocalStorageSet } from "@/lib/useLocalStorageSet";
-
-const ALL_SONGS = [...EAC_SONGS, ...MISSA_SONGS];
+import { useAllPublishedSongs } from "@/lib/useCatalog";
 
 export default function SelecaoPage() {
   const selection = useLocalStorageSet("eac:selection");
+  const { songs: allSongs, usingSampleData } = useAllPublishedSongs();
   const [pdfMsg, setPdfMsg] = useState<string | null>(null);
-  const songs = selection.ids.map((id) => ALL_SONGS.find((s) => s.id === id)).filter(Boolean) as typeof ALL_SONGS;
+  const songs = selection.ids.map((id) => allSongs.find((s) => s.id === id)).filter((s): s is (typeof allSongs)[number] => Boolean(s));
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 space-y-5">
@@ -21,6 +21,8 @@ export default function SelecaoPage() {
           editor/admin chegam na Fase 2.
         </p>
       </div>
+
+      {usingSampleData && <DemoBanner />}
 
       {!songs.length && (
         <p className="text-sm text-ink-soft rounded-xl border border-dashed border-border p-4">

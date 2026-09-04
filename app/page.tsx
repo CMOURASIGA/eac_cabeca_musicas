@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import SongCard from "@/components/SongCard";
-import { EAC_SONGS, MISSA_SONGS, findSongBySlug } from "@/lib/sampleData";
+import DemoBanner from "@/components/DemoBanner";
 import { useLocalStorageSet } from "@/lib/useLocalStorageSet";
-
-const ALL_SONGS = [...EAC_SONGS, ...MISSA_SONGS];
+import { useAllPublishedSongs } from "@/lib/useCatalog";
 
 export default function HomePage() {
   const favorites = useLocalStorageSet("eac:favorites");
   const selection = useLocalStorageSet("eac:selection");
+  const { songs: allSongs, usingSampleData } = useAllPublishedSongs();
   const [recentSlugs, setRecentSlugs] = useState<string[]>([]);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
 
@@ -30,11 +30,15 @@ export default function HomePage() {
     return () => window.removeEventListener("beforeinstallprompt", onBeforeInstall);
   }, []);
 
-  const favoriteSongs = ALL_SONGS.filter((s) => favorites.has(s.id));
-  const recentSongs = recentSlugs.map(findSongBySlug).filter(Boolean).slice(0, 4) as typeof ALL_SONGS;
+  const favoriteSongs = allSongs.filter((s) => favorites.has(s.id));
+  const recentSongs = recentSlugs
+    .map((slug) => allSongs.find((s) => s.slug === slug))
+    .filter((s): s is (typeof allSongs)[number] => Boolean(s))
+    .slice(0, 4);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:py-10 space-y-10">
+      {usingSampleData && <DemoBanner />}
       <section className="grid gap-4 sm:grid-cols-2">
         <Link
           href="/livro-eac"
@@ -46,7 +50,7 @@ export default function HomePage() {
             <div className="font-serif text-2xl font-semibold mt-1">Livro EAC</div>
           </div>
           <div className="text-sm font-bold bg-white/15 self-start px-3 py-1.5 rounded-lg">
-            Ver as {EAC_SONGS.length} músicas →
+            Ver o Livro EAC →
           </div>
         </Link>
         <Link

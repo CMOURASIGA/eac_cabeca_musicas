@@ -1,7 +1,7 @@
 import Link from "next/link";
-import type { SampleSong } from "@/lib/sampleData";
+import type { UiSong } from "@/lib/uiSong";
 
-export default function SongCard({ song }: { song: SampleSong }) {
+export default function SongCard({ song }: { song: UiSong }) {
   const accent = song.collection === "EAC" ? "text-eac bg-eac-soft" : "text-missa bg-missa-soft";
   return (
     <Link
