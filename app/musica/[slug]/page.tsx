@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import DemoBanner from "@/components/DemoBanner";
 import ErrorBanner from "@/components/ErrorBanner";
+import { requestPdf } from "@/lib/pdf/requestPdf";
 import { parseSongTxt, extractUsedChords } from "@/lib/parseSongTxt";
 import { transposeChord, transposeChordLine } from "@/lib/transpose";
 import ChordDiagram from "@/components/ChordDiagram";
@@ -60,6 +61,7 @@ export default function SongPage({ params }: { params: { slug: string } }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [favPulse, setFavPulse] = useState(false);
   const [selPulse, setSelPulse] = useState(false);
+  const [pdfBusy, setPdfBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const wakeLockRef = useRef<any>(null);
 
@@ -142,6 +144,16 @@ export default function SongPage({ params }: { params: { slug: string } }) {
     selection.toggle(song!.id);
     setSelPulse(true);
     setTimeout(() => setSelPulse(false), 320);
+  }
+
+  async function generatePdf() {
+    if (pdfBusy) return;
+    setPdfBusy(true);
+    setShareMsg("Gerando PDF...");
+    const result = await requestPdf({ items: [{ slug: song!.slug, semitones }] });
+    setPdfBusy(false);
+    setShareMsg(result.ok ? "PDF gerado — confira os downloads." : result.message);
+    setTimeout(() => setShareMsg(null), 3000);
   }
 
   async function toggleWakeLock() {
@@ -299,14 +311,8 @@ export default function SongPage({ params }: { params: { slug: string } }) {
           <button onClick={toggleWakeLock} className={`tool ${wakeLockOn ? "!bg-eac !text-white" : ""}`}>
             {wakeLockOn ? "✓ Tela acordada" : "Tela acordada"}
           </button>
-          <button
-            onClick={() => {
-              setShareMsg("Geração de PDF chega na Fase 2 (repertórios e PDF).");
-              setTimeout(() => setShareMsg(null), 2500);
-            }}
-            className="tool"
-          >
-            Gerar PDF
+          <button onClick={generatePdf} disabled={pdfBusy} className="tool">
+            {pdfBusy ? "Gerando..." : "Gerar PDF"}
           </button>
           <button onClick={share} className="tool">Compartilhar</button>
         </div>

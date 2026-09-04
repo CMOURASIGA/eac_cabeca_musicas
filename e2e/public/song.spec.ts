@@ -173,4 +173,19 @@ test.describe("Página da música", () => {
     const count = await diagrams.count();
     expect(count).toBeGreaterThan(0);
   });
+
+  test("gerar PDF individual baixa um PDF real", async ({ page }) => {
+    await openFirstSong(page);
+    await page.getByRole("button", { name: "Mais opções" }).click();
+    const [download] = await Promise.all([
+      page.waitForEvent("download", { timeout: 15000 }),
+      page.getByRole("button", { name: "Gerar PDF" }).click(),
+    ]);
+    expect(download.suggestedFilename()).toMatch(/\.pdf$/);
+    const path = await download.path();
+    expect(path).toBeTruthy();
+    const fs = await import("node:fs");
+    const bytes = fs.readFileSync(path!);
+    expect(bytes.subarray(0, 5).toString("ascii")).toBe("%PDF-");
+  });
 });
