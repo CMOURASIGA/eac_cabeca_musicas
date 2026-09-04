@@ -11,6 +11,7 @@ ordem**, o conteúdo de cada arquivo:
 
 1. `supabase/migrations/0001_init_livro_musicas_eac.sql`
 2. `supabase/migrations/0002_seed_categories.sql`
+3. `supabase/migrations/0003_grants.sql`
 
 Cada um está em uma transação (`begin`/`commit`): se algo falhar no meio
 (por exemplo, um nome já existir por outro motivo no seu projeto), nada
@@ -42,6 +43,11 @@ Copie `.env.example` para `.env.local` e preencha as duas variáveis (ou
 configure-as direto na plataforma de deploy). Nenhuma outra chave é
 necessária — o app nunca usa a `service_role` key, todas as operações do
 painel administrativo passam pela sessão do usuário logado + RLS.
+
+> Erro `permission denied for table eac_import_jobs` (ou qualquer outra
+> tabela `eac_*`) ao usar o app: falta rodar a `0003_grants.sql` — é uma
+> mensagem de falta de GRANT, diferente de RLS bloqueando por papel. Rode
+> esse arquivo e recarregue a página.
 
 ## 3. Desligar o cadastro público de contas
 
