@@ -17,6 +17,13 @@ Cada um está em uma transação (`begin`/`commit`): se algo falhar no meio
 daquele arquivo fica aplicado — me avise qual foi o erro antes de tentar
 de novo, não rode com `force`.
 
+> Se você já tentou rodar a `0001` e bateu no erro `42P17: generation
+> expression is not immutable`: era a coluna gerada `search_text` usando
+> `unaccent()` (não é IMMUTABLE). Já corrigido — puxe a versão mais nova
+> do arquivo (agora usa um trigger em vez de coluna gerada) e rode de
+> novo. Como a migration inteira roda numa transação, o erro anterior não
+> deixou nada aplicado — pode rodar limpo.
+
 Se preferir usar a Supabase CLI em vez do SQL Editor:
 
 ```bash

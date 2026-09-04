@@ -139,10 +139,26 @@ create table if not exists public.eac_songs (
   created_by uuid references public.eac_profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  search_text text generated always as (
-    lower(unaccent(coalesce(title, '') || ' ' || coalesce(source_text, '')))
-  ) stored
+  search_text text
 );
+
+-- search_text não pode ser "generated always as" porque unaccent() não é
+-- IMMUTABLE (depende da configuração de busca textual) — o Postgres recusa
+-- esse uso em coluna gerada. Um trigger resolve igual, sem essa exigência.
+create or replace function public.eac_songs_set_search_text()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.search_text = lower(unaccent(coalesce(new.title, '') || ' ' || coalesce(new.source_text, '')));
+  return new;
+end;
+$$;
+
+drop trigger if exists eac_songs_set_search_text on public.eac_songs;
+create trigger eac_songs_set_search_text
+  before insert or update on public.eac_songs
+  for each row execute function public.eac_songs_set_search_text();
 
 drop trigger if exists eac_songs_set_updated_at on public.eac_songs;
 create trigger eac_songs_set_updated_at
