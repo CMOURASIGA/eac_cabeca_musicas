@@ -25,12 +25,17 @@ const QUALITY_TOKENS = [
   "maj13", "maj11", "maj9", "maj7", "add9", "add11", "add13",
   "sus2", "sus4", "sus", "dim7", "dim", "aug", "m7b5",
   "m6", "m7", "m9", "m11", "m13", "mM7", "m",
-  "7M", "M7", "6/9", "69", "6", "7", "9", "11", "13", "5",
-  "ø", "°", "\\+",
+  "7M", "M7", "6/9", "69", "6", "7", "9", "11", "13", "5", "4",
+  "ø", "°", "º", "\\+",
+  // extensões entre parênteses como usadas nas cifras reais importadas:
+  // "D7(4)", "E7(11)", "C#7(9+)", "B7(9/11+/13)"
+  "\\([0-9+\\-/]+\\)",
 ] as const;
 
 const QUALITY_RE = `(?:${QUALITY_TOKENS.join("|")})*`;
-const CHORD_RE = new RegExp(`^([A-G])(#|b)?(${QUALITY_RE})(?:/([A-G])(#|b)?)?$`);
+// parênteses envolvendo o acorde inteiro são comuns em anotações de cifra
+// ("(D)", "(A/C#)") e são só um detalhe de grafia, não afetam o acorde em si.
+const CHORD_RE = new RegExp(`^(\\()?([A-G])(#|b)?(${QUALITY_RE})(?:/([A-G])(#|b)?)?(\\))?$`);
 
 export interface ParsedChord {
   root: string;
@@ -38,6 +43,8 @@ export interface ParsedChord {
   quality: string;
   bass: string | null;
   bassAccidental: "#" | "b" | "";
+  hasOpenParen: boolean;
+  hasCloseParen: boolean;
 }
 
 export function parseChord(token: string): ParsedChord | null {
@@ -45,13 +52,18 @@ export function parseChord(token: string): ParsedChord | null {
   if (!trimmed) return null;
   const match = trimmed.match(CHORD_RE);
   if (!match) return null;
-  const [, root, rootAcc, quality, bass, bassAcc] = match;
+  const [, openParen, root, rootAcc, quality, bass, bassAcc, closeParen] = match;
+  // Parênteses podem não estar balanceados no MESMO token quando anotam um
+  // grupo de vários acordes ("(E/G# E D/F# E/G#)"): o primeiro token carrega
+  // só o "(" e o último só o ")". Cada lado é tratado independentemente.
   return {
     root,
     rootAccidental: (rootAcc as "#" | "b") ?? "",
     quality: quality ?? "",
     bass: bass ?? null,
     bassAccidental: (bassAcc as "#" | "b") ?? "",
+    hasOpenParen: Boolean(openParen),
+    hasCloseParen: Boolean(closeParen),
   };
 }
 
@@ -78,6 +90,8 @@ export function transposeChord(token: string, semitones: number): string {
     const newBass = shiftNote(chord.bass, chord.bassAccidental, semitones, chord.bassAccidental === "b");
     result += "/" + newBass;
   }
+  if (chord.hasOpenParen) result = "(" + result;
+  if (chord.hasCloseParen) result = result + ")";
   return result;
 }
 

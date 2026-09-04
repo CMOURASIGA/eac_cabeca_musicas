@@ -27,6 +27,20 @@ describe("transposeChord", () => {
     expect(transposeChord("Cadd9", 2)).toBe("Dadd9");
   });
 
+  it("aceita 'º' (ordinal) como sinônimo de '°' (diminuto), comum em TXT reais", () => {
+    expect(transposeChord("Eº", 2)).toBe("F#º");
+  });
+
+  it("aceita extensões entre parênteses sem alterar a extensão", () => {
+    expect(transposeChord("D7(4)", 2)).toBe("E7(4)");
+    expect(transposeChord("B7(9/11+/13)", 1)).toBe("C7(9/11+/13)");
+  });
+
+  it("aceita o acorde inteiro entre parênteses, mantendo os parênteses", () => {
+    expect(transposeChord("(D)", 2)).toBe("(E)");
+    expect(transposeChord("(A/C#)", 2)).toBe("(B/D#)");
+  });
+
   it("preserva grafia com bemol quando o acorde original usa bemol", () => {
     expect(transposeChord("Bb", 2)).toBe("C");
     expect(transposeChord("Eb", -1)).toBe("D");
