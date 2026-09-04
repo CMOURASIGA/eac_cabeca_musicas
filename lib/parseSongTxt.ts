@@ -7,7 +7,7 @@
  * A letra nunca é tocada; só linhas classificadas como "chord" podem ser
  * transpostas (ver lib/transpose.ts).
  */
-import { isChordToken } from "./transpose";
+import { isChordToken, parseChord } from "./transpose";
 
 export type SongLineType = "section" | "chord" | "lyric" | "blank";
 
@@ -74,6 +74,57 @@ export function parseSongTxt(raw: string): ParsedSong {
   while (lines.length && lines[0].type === "blank") lines.shift();
 
   return { frontMatter, lines };
+}
+
+function simplifyForKey(token: string): string | null {
+  const chord = parseChord(token);
+  if (!chord) return null;
+  const isMinor = chord.quality.startsWith("m") && !chord.quality.startsWith("maj") && !chord.quality.startsWith("mM7");
+  return chord.root + chord.rootAccidental + (isMinor ? "m" : "");
+}
+
+/**
+ * Sugestão (não confirmação) de tom quando o TXT não declara `key:` no
+ * front matter — a maioria das cifras não escreve o tom em lugar nenhum,
+ * só lista os acordes. Heurística padrão de cifra popular: a música quase
+ * sempre começa e termina no acorde-tônica; quando isso bate, é o tom. Sem
+ * bater, cai para o acorde simplificado (raiz + m se menor) mais frequente.
+ * Sempre precisa de confirmação humana antes de publicar — nunca é tratado
+ * como certeza.
+ */
+export function guessKey(lines: SongLine[]): string | null {
+  const tokens: string[] = [];
+  lines
+    .filter((l) => l.type === "chord")
+    .forEach((l) => {
+      l.content
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .forEach((t) => {
+          if (isChordToken(t)) tokens.push(t);
+        });
+    });
+  if (!tokens.length) return null;
+
+  const first = simplifyForKey(tokens[0]);
+  const last = simplifyForKey(tokens[tokens.length - 1]);
+  if (first && first === last) return first;
+
+  const freq = new Map<string, number>();
+  tokens.forEach((t) => {
+    const id = simplifyForKey(t);
+    if (id) freq.set(id, (freq.get(id) ?? 0) + 1);
+  });
+  let best: string | null = null;
+  let bestCount = 0;
+  freq.forEach((count, id) => {
+    if (count > bestCount) {
+      bestCount = count;
+      best = id;
+    }
+  });
+  return best;
 }
 
 /** Lista (sem duplicatas, na ordem em que aparecem) dos acordes usados na música. */

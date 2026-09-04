@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { parseSongTxt, extractUsedChords } from "@/lib/parseSongTxt";
+import { parseSongTxt, extractUsedChords, guessKey } from "@/lib/parseSongTxt";
 import { findDuplicateCandidate, type DuplicateCandidate, type ExistingSongForDuplicateCheck } from "@/lib/duplicateDetection";
 import { deriveNumberFromFilename, deriveTitleFromFilename } from "@/lib/deriveTitle";
 import { slugify } from "@/lib/slug";
@@ -27,6 +27,8 @@ interface ImportRow {
   number: number | null;
   originalKey: string | null;
   ambiguousKey: boolean;
+  /** true quando o tom veio de uma heurística (1º/último acorde ou mais frequente), não do front matter — precisa de confirmação humana. */
+  keyIsSuggestion: boolean;
   chords: string[];
   collection: Collection;
   categoryId: string | null;
@@ -67,7 +69,9 @@ export default function AdminImportarPage() {
 
       const title = frontMatter.title?.trim() || deriveTitleFromFilename(file.name);
       const number = frontMatter.number ? Number(frontMatter.number) : deriveNumberFromFilename(file.name);
-      const originalKey = frontMatter.key?.trim() || null;
+      const keyFromFrontMatter = frontMatter.key?.trim() || null;
+      const suggestedKey = keyFromFrontMatter ? null : guessKey(lines);
+      const originalKey = keyFromFrontMatter ?? suggestedKey;
       const collection: Collection = frontMatter.collection?.toUpperCase() === "MISSA" ? "MISSA" : "EAC";
       const chords = extractUsedChords(lines);
 
@@ -81,7 +85,8 @@ export default function AdminImportarPage() {
         title,
         number,
         originalKey,
-        ambiguousKey: !originalKey,
+        ambiguousKey: !keyFromFrontMatter,
+        keyIsSuggestion: Boolean(suggestedKey),
         chords,
         collection,
         categoryId: null,
@@ -291,11 +296,22 @@ export default function AdminImportarPage() {
                       <td className="px-3 py-2.5">
                         <input
                           value={row.originalKey ?? ""}
-                          onChange={(e) => updateRow(row.localId, { originalKey: e.target.value || null, ambiguousKey: !e.target.value })}
+                          onChange={(e) =>
+                            updateRow(row.localId, {
+                              originalKey: e.target.value || null,
+                              ambiguousKey: !e.target.value,
+                              keyIsSuggestion: false, // edição manual conta como confirmado
+                            })
+                          }
                           placeholder="?"
                           className="w-14 rounded border border-border px-2 py-1 text-xs"
                         />
-                        {row.ambiguousKey && <div className="text-[10px] text-amber-700 mt-0.5">ambíguo</div>}
+                        {row.ambiguousKey && row.keyIsSuggestion && (
+                          <div className="text-[10px] text-amber-700 mt-0.5">sugerido, confirme</div>
+                        )}
+                        {row.ambiguousKey && !row.keyIsSuggestion && (
+                          <div className="text-[10px] text-amber-700 mt-0.5">ambíguo</div>
+                        )}
                       </td>
                       <td className="px-3 py-2.5">
                         <div className="flex flex-wrap gap-1 max-w-[140px]">
