@@ -38,13 +38,13 @@ export default function HomePage() {
     .slice(0, 4);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:py-10 space-y-10">
+    <div className="mx-auto w-full max-w-6xl min-w-0 overflow-x-hidden px-3 py-5 sm:px-4 sm:py-10 space-y-7 sm:space-y-10">
       {usingSampleData && <DemoBanner />}
       {catalogError && <ErrorBanner message={catalogError} />}
 
-      <div className="flex items-center gap-2 -mb-2">
+      <div className="flex min-w-0 items-start gap-2 -mb-1">
         <span className="h-1.5 w-1.5 rounded-full bg-red" />
-        <p className="text-xs font-semibold uppercase tracking-wider text-ink-faint">
+        <p className="min-w-0 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.08em] sm:tracking-wider text-ink-faint leading-relaxed break-words">
           Firmes na fé, unidos no amor — Banda EAC
         </p>
       </div>
@@ -52,7 +52,7 @@ export default function HomePage() {
       <section className="grid gap-4 sm:grid-cols-2">
         <Link
           href="/livro-eac"
-          className="rounded-2xl p-6 min-h-[120px] flex flex-col justify-between text-white"
+          className="rounded-2xl p-5 sm:p-6 min-h-[118px] flex flex-col justify-between text-white"
           style={{ background: "linear-gradient(135deg, #0F1B33 0%, #060B18 100%)" }}
         >
           <div>
@@ -65,7 +65,7 @@ export default function HomePage() {
         </Link>
         <Link
           href="/missa"
-          className="rounded-2xl p-6 min-h-[120px] flex flex-col justify-between text-white"
+          className="rounded-2xl p-5 sm:p-6 min-h-[118px] flex flex-col justify-between text-white"
           style={{ background: "linear-gradient(135deg, #5A4B78 0%, #3E3355 100%)" }}
         >
           <div>
@@ -78,7 +78,7 @@ export default function HomePage() {
         </Link>
       </section>
 
-      <form action="/livro-eac" className="flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-3">
+      <form action="/livro-eac" className="flex min-w-0 items-center gap-2 rounded-xl border border-border bg-white px-3 sm:px-4 py-3">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8B969C" strokeWidth="2">
           <circle cx="11" cy="11" r="7" />
           <path d="M21 21l-4.3-4.3" />
@@ -86,7 +86,7 @@ export default function HomePage() {
         <input
           name="q"
           placeholder="Buscar por título ou trecho da letra"
-          className="flex-1 outline-none text-sm placeholder:text-ink-faint bg-transparent"
+          className="min-w-0 flex-1 outline-none text-sm placeholder:text-ink-faint bg-transparent"
         />
       </form>
 
