@@ -13,7 +13,7 @@ import { useLocalStorageSet } from "@/lib/useLocalStorageSet";
 import { usePublishedSong } from "@/lib/useCatalog";
 
 const SPEED_STEPS = [1, 2, 3, 4, 5];
-const MIN_FONT = 9;
+const MIN_FONT = 13;
 const MAX_FONT = 26;
 const DEFAULT_FONT = 16;
 // Aproximação da largura de um caractere em fonte monoespaçada, em unidades
@@ -324,8 +324,8 @@ export default function SongPage({ params }: { params: { slug: string } }) {
         </div>
       )}
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto chord-scroll px-4 py-5">
-        <div className="font-mono leading-[1.9]" style={{ fontSize }}>
+      <div ref={scrollRef} className="flex-1 min-w-0 w-full max-w-full overflow-y-auto overflow-x-hidden chord-scroll px-3 sm:px-4 py-5">
+        <div className="font-mono leading-[1.75] w-full max-w-full" style={{ fontSize }}>
           {parsed.lines.map((line, i) => {
             if (line.type === "blank") return <div key={i} className="h-4" />;
             if (line.type === "section")
@@ -336,12 +336,12 @@ export default function SongPage({ params }: { params: { slug: string } }) {
               );
             if (line.type === "chord")
               return (
-                <div key={i} className="whitespace-pre font-bold text-red">
+                <div key={i} className="whitespace-pre-wrap break-words font-bold text-red max-w-full">
                   {transposeChordLine(line.content, semitones)}
                 </div>
               );
             return (
-              <div key={i} className="whitespace-pre text-ink dark:text-[#EAF0F3]">
+              <div key={i} className="whitespace-pre-wrap break-words text-ink dark:text-[#EAF0F3] max-w-full">
                 {line.content}
               </div>
             );
