@@ -9,6 +9,13 @@ html.dark {
   color-scheme: dark;
 }
 
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   background-color: theme("colors.paper");
   color: theme("colors.ink");
@@ -64,5 +71,27 @@ html.dark body {
   }
   html.dark .tool {
     @apply border-dark-border bg-dark-surface text-[#EAF0F3];
+  }
+}
+
+
+.mobile-chip-scroll {
+  scrollbar-width: none;
+}
+.mobile-chip-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  input,
+  button,
+  select,
+  textarea {
+    max-width: 100%;
+  }
+
+  img,
+  svg {
+    max-width: 100%;
   }
 }
