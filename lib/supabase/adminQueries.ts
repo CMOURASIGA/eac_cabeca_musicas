@@ -24,7 +24,7 @@ export async function fetchAdminSongs(): Promise<AdminSongRow[]> {
   const { data, error } = await supabase
     .from("eac_songs")
     .select(
-      "id, number, title, slug, collection, available_for_mass, mass_category_id, original_key, status, version, updated_at, category:eac_song_categories(name)"
+      "id, number, title, slug, collection, available_for_mass, mass_category_id, original_key, status, version, updated_at, category:eac_song_categories!eac_songs_category_id_fkey(name)"
     )
     .order("updated_at", { ascending: false });
   if (error) throw error;
