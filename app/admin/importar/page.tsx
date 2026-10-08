@@ -32,6 +32,8 @@ interface ImportRow {
   chords: string[];
   collection: Collection;
   categoryId: string | null;
+  availableForMass: boolean;
+  massCategoryId: string | null;
   duplicate: DuplicateCandidate | null;
   confirmOverwrite: boolean;
   targetStatus: "DRAFT" | "PUBLISHED";
@@ -90,6 +92,8 @@ export default function AdminImportarPage() {
         chords,
         collection,
         categoryId: null,
+        availableForMass: collection === "MISSA",
+        massCategoryId: null,
         duplicate,
         confirmOverwrite: false,
         targetStatus: "DRAFT",
@@ -160,6 +164,8 @@ export default function AdminImportarPage() {
           slug,
           collection: row.collection,
           categoryId: row.categoryId,
+          availableForMass: row.availableForMass,
+          massCategoryId: row.massCategoryId,
           originalKey: row.originalKey,
           sourceText: row.rawText,
           normalizedLines: parsed.lines,
@@ -272,6 +278,7 @@ export default function AdminImportarPage() {
                   <th className="px-3 py-2.5">Acordes</th>
                   <th className="px-3 py-2.5">Coleção</th>
                   <th className="px-3 py-2.5">Categoria</th>
+                  <th className="px-3 py-2.5">Uso em Missa</th>
                   <th className="px-3 py-2.5">Status</th>
                   <th className="px-3 py-2.5">Publicar?</th>
                   <th className="px-3 py-2.5"></th>
@@ -280,6 +287,7 @@ export default function AdminImportarPage() {
               <tbody>
                 {rows.map((row) => {
                   const rowCategories = categories.filter((c) => c.collection === row.collection);
+                  const missaCategories = categories.filter((c) => c.collection === "MISSA");
                   return (
                     <tr key={row.localId} className="border-b border-border last:border-0 align-top">
                       <td className="px-3 py-2.5 font-mono text-xs text-ink-soft max-w-[140px] truncate">
@@ -351,6 +359,37 @@ export default function AdminImportarPage() {
                             </option>
                           ))}
                         </select>
+                      </td>
+                      <td className="px-3 py-2.5 min-w-[180px]">
+                        {row.collection === "MISSA" ? (
+                          <span className="text-[11px] font-bold text-missa">Catálogo de Missa</span>
+                        ) : (
+                          <div className="space-y-2">
+                            <label className="flex items-center gap-2 text-[11px] font-semibold">
+                              <input
+                                type="checkbox"
+                                checked={row.availableForMass}
+                                onChange={(e) => updateRow(row.localId, {
+                                  availableForMass: e.target.checked,
+                                  massCategoryId: e.target.checked ? row.massCategoryId : null,
+                                })}
+                              />
+                              Também disponível para Missa
+                            </label>
+                            {row.availableForMass && (
+                              <select
+                                value={row.massCategoryId ?? ""}
+                                onChange={(e) => updateRow(row.localId, { massCategoryId: e.target.value || null })}
+                                className="w-full rounded border border-border px-2 py-1 text-xs"
+                              >
+                                <option value="">Sem categoria litúrgica</option>
+                                {missaCategories.map((c) => (
+                                  <option key={c.id} value={c.id}>{c.name}</option>
+                                ))}
+                              </select>
+                            )}
+                          </div>
+                        )}
                       </td>
                       <td className="px-3 py-2.5">
                         {row.duplicate ? (
