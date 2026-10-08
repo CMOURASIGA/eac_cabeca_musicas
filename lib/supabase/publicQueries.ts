@@ -5,7 +5,7 @@ import type { Collection } from "@/lib/sampleData";
 import type { UiSong } from "@/lib/uiSong";
 
 const SONG_SELECT =
-  "id, number, title, slug, collection, available_for_mass, mass_category_id, original_key, version, updated_at, source_text, category:eac_song_categories(name)";
+  "id, number, title, slug, collection, available_for_mass, mass_category_id, original_key, version, updated_at, source_text, category:eac_song_categories!eac_songs_category_id_fkey(name)";
 
 function mapRow(row: any): UiSong {
   return {
