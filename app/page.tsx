@@ -38,21 +38,23 @@ export default function HomePage() {
     .slice(0, 4);
 
   return (
-    <div className="mx-auto w-full max-w-6xl min-w-0 overflow-x-hidden px-3 py-5 sm:px-4 sm:py-10 space-y-7 sm:space-y-10">
+    <div className="mx-auto w-full max-w-6xl min-w-0 overflow-x-hidden px-3 py-5 pb-24 sm:px-4 sm:py-10 sm:pb-10 space-y-6 sm:space-y-10">
       {usingSampleData && <DemoBanner />}
       {catalogError && <ErrorBanner message={catalogError} />}
 
-      <div className="flex min-w-0 items-start gap-2 -mb-1">
-        <span className="h-1.5 w-1.5 rounded-full bg-red" />
-        <p className="min-w-0 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.08em] sm:tracking-wider text-ink-faint leading-relaxed break-words">
-          Firmes na fé, unidos no amor — Banda EAC
-        </p>
-      </div>
+      <section className="relative overflow-hidden rounded-[26px] border border-gold/25 bg-white px-5 py-6 shadow-sm sm:px-7 sm:py-8">
+        <div className="absolute -right-8 -top-10 h-36 w-36 rounded-full bg-gold-soft/70 blur-sm" />
+        <div className="relative">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-gold-deep">Bem-vindo(a)</p>
+          <h1 className="mt-1 font-serif text-3xl font-bold text-eac sm:text-4xl">Cabeça do EAC</h1>
+          <p className="mt-1 text-sm text-ink-soft">Músicas que unem nossa fé, missão e comunidade.</p>
+        </div>
+      </section>
 
       <section className="grid gap-4 sm:grid-cols-2">
         <Link
           href="/livro-eac"
-          className="rounded-2xl p-5 sm:p-6 min-h-[118px] flex flex-col justify-between text-white"
+          className="rounded-[22px] p-5 sm:p-6 min-h-[132px] flex flex-col justify-between text-white shadow-sm"
           style={{ background: "linear-gradient(135deg, #0F1B33 0%, #060B18 100%)" }}
         >
           <div>
@@ -85,7 +87,7 @@ export default function HomePage() {
         </svg>
         <input
           name="q"
-          placeholder="Buscar por título ou trecho da letra"
+          placeholder="Buscar por título ou número"
           className="min-w-0 flex-1 outline-none text-sm placeholder:text-ink-faint bg-transparent"
         />
       </form>
