@@ -7,6 +7,7 @@ import {
   fetchCategories,
   fetchPublishedSongBySlug,
   fetchPublishedSongs,
+  fetchPublishedMassSongs,
   type CategoryOption,
 } from "./supabase/publicQueries";
 import { EAC_SONGS, MISSA_SONGS, type Collection } from "./sampleData";
@@ -63,6 +64,40 @@ export function useCatalog(collection: Collection) {
       alive = false;
     };
   }, [collection]);
+
+  return { songs, categories, loading, usingSampleData, error };
+}
+
+export function useMassCatalog() {
+  const [songs, setSongs] = useState<UiSong[]>(() => (isSupabaseConfigured ? [] : SAMPLE_BY_COLLECTION.MISSA));
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [loading, setLoading] = useState(isSupabaseConfigured);
+  const [error, setError] = useState<string | null>(null);
+  const usingSampleData = !isSupabaseConfigured;
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    Promise.all([fetchPublishedMassSongs(), fetchCategories("MISSA")])
+      .then(([songsData, categoriesData]) => {
+        if (!alive) return;
+        setSongs(songsData);
+        setCategories(categoriesData);
+      })
+      .catch((err) => {
+        console.error("Falha ao carregar catálogo litúrgico:", err);
+        if (!alive) return;
+        setSongs([]);
+        setError(QUERY_ERROR_MESSAGE);
+      })
+      .finally(() => alive && setLoading(false));
+
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   return { songs, categories, loading, usingSampleData, error };
 }
