@@ -4,9 +4,12 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   fetchAdminSongs,
+  fetchCategoriesAll,
+  setSongMassAvailability,
   setSongStatus,
   setSongsStatusBulk,
   type AdminSongRow,
+  type CategoryRow,
 } from "@/lib/supabase/adminQueries";
 import type { SongStatus } from "@/lib/supabase/database.types";
 
@@ -24,6 +27,7 @@ const STATUS_CLASS: Record<SongStatus, string> = {
 
 export default function AdminMusicasPage() {
   const [songs, setSongs] = useState<AdminSongRow[]>([]);
+  const [categories, setCategories] = useState<CategoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [collectionFilter, setCollectionFilter] = useState<"TODAS" | "EAC" | "MISSA">("TODAS");
@@ -35,7 +39,9 @@ export default function AdminMusicasPage() {
     setLoading(true);
     setError(null);
     try {
-      setSongs(await fetchAdminSongs());
+      const [songRows, categoryRows] = await Promise.all([fetchAdminSongs(), fetchCategoriesAll()]);
+      setSongs(songRows);
+      setCategories(categoryRows);
     } catch (err: any) {
       setError(err.message ?? "Falha ao carregar músicas.");
     } finally {
@@ -81,6 +87,16 @@ export default function AdminMusicasPage() {
       if (allVisibleSelected) return new Set();
       return new Set(filtered.map((s) => s.id));
     });
+  }
+
+  async function changeMassAvailability(id: string, available: boolean, massCategoryId: string | null) {
+    setError(null);
+    try {
+      await setSongMassAvailability(id, available, massCategoryId);
+      await load();
+    } catch (err: any) {
+      setError(err.message ?? "Falha ao atualizar disponibilidade para Missa.");
+    }
   }
 
   async function changeStatus(id: string, status: SongStatus) {
@@ -194,6 +210,7 @@ export default function AdminMusicasPage() {
                 <th className="px-4 py-2.5">Título</th>
                 <th className="px-4 py-2.5">Coleção</th>
                 <th className="px-4 py-2.5">Categoria</th>
+                <th className="px-4 py-2.5">Uso em Missa</th>
                 <th className="px-4 py-2.5">Tom</th>
                 <th className="px-4 py-2.5">Status</th>
                 <th className="px-4 py-2.5">Atualizado</th>
@@ -218,6 +235,34 @@ export default function AdminMusicasPage() {
                     </span>
                   </td>
                   <td className="px-4 py-2.5">{s.categoryName ?? "—"}</td>
+                  <td className="px-4 py-2.5 min-w-[190px]">
+                    {s.collection === "MISSA" ? (
+                      <span className="rounded bg-missa-soft px-2 py-1 text-xs font-bold text-missa">Catálogo de Missa</span>
+                    ) : (
+                      <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-xs font-semibold">
+                          <input
+                            type="checkbox"
+                            checked={s.availableForMass}
+                            onChange={(e) => changeMassAvailability(s.id, e.target.checked, s.massCategoryId)}
+                          />
+                          Disponível para Missa
+                        </label>
+                        {s.availableForMass && (
+                          <select
+                            value={s.massCategoryId ?? ""}
+                            onChange={(e) => changeMassAvailability(s.id, true, e.target.value || null)}
+                            className="w-full rounded border border-border px-2 py-1 text-xs"
+                          >
+                            <option value="">Sem categoria litúrgica</option>
+                            {categories.filter((cat) => cat.collection === "MISSA").map((cat) => (
+                              <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    )}
+                  </td>
                   <td className="px-4 py-2.5">{s.originalKey ?? "—"}</td>
                   <td className="px-4 py-2.5">
                     <span className={`rounded px-1.5 py-0.5 text-xs font-bold ${STATUS_CLASS[s.status]}`}>
@@ -248,7 +293,7 @@ export default function AdminMusicasPage() {
               ))}
               {!filtered.length && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-6 text-center text-ink-soft">
+                  <td colSpan={10} className="px-4 py-6 text-center text-ink-soft">
                     Nenhuma música com esse filtro.
                   </td>
                 </tr>
