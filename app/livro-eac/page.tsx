@@ -8,6 +8,11 @@ import ErrorBanner from "@/components/ErrorBanner";
 import { useCatalog } from "@/lib/useCatalog";
 import { matchesQuery } from "@/lib/search";
 
+const titleCollator = new Intl.Collator("pt-BR", {
+  sensitivity: "base",
+  numeric: true,
+});
+
 function CatalogEAC() {
   const params = useSearchParams();
   const [query, setQuery] = useState(params.get("q") ?? "");
@@ -27,7 +32,7 @@ function CatalogEAC() {
             (category === "Todas" || s.category === category) &&
             (matchesQuery(s.title, query) || matchesQuery(s.sourceText, query) || String(s.number ?? "").includes(query))
         )
-        .sort((a, b) => (a.number ?? 0) - (b.number ?? 0)),
+        .sort((a, b) => titleCollator.compare(a.title, b.title)),
     [songs, query, category]
   );
 
