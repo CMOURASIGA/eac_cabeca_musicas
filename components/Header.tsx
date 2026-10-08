@@ -28,7 +28,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 w-full border-b border-border bg-white/95 backdrop-blur">
+      <header className={(pathname.startsWith("/musica/") ? "hidden sm:block " : "") + "sticky top-0 z-30 w-full border-b border-border bg-white/95 backdrop-blur"}>
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center px-3 sm:px-4">
           <Link href="/" className="flex min-w-0 items-center gap-2">
             <Image src="/logo.png" alt="Logo EAC" width={34} height={34} className="rounded-xl" />
