@@ -9,6 +9,13 @@ html.dark {
   color-scheme: dark;
 }
 
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   background-color: theme("colors.paper");
   color: theme("colors.ink");
@@ -18,10 +25,20 @@ html.dark body {
   color: #eef2f4;
 }
 
-/* impede que uma linha de cifra/letra muito longa quebre o layout no mobile */
+/* Leitura da cifra em mobile: nunca exige arraste horizontal.
+   Linhas longas podem quebrar, preservando espaços sempre que possível. */
 .chord-scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+@media (max-width: 640px) {
+  .chord-scroll {
+    scrollbar-width: none;
+  }
+  .chord-scroll::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @keyframes eac-splash-in {
@@ -54,5 +71,27 @@ html.dark body {
   }
   html.dark .tool {
     @apply border-dark-border bg-dark-surface text-[#EAF0F3];
+  }
+}
+
+
+.mobile-chip-scroll {
+  scrollbar-width: none;
+}
+.mobile-chip-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  input,
+  button,
+  select,
+  textarea {
+    max-width: 100%;
+  }
+
+  img,
+  svg {
+    max-width: 100%;
   }
 }

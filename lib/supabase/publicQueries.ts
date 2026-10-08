@@ -30,7 +30,7 @@ export async function fetchPublishedSongs(collection: Collection): Promise<UiSon
     .select(SONG_SELECT)
     .eq("collection", collection)
     .eq("status", "PUBLISHED")
-    .order("number", { ascending: true, nullsFirst: false });
+    .order("title", { ascending: true });
   if (error) throw error;
   return (data ?? []).map(mapRow);
 }
