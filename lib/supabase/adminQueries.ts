@@ -11,6 +11,8 @@ export interface AdminSongRow {
   slug: string;
   collection: Collection;
   categoryName: string | null;
+  availableForMass: boolean;
+  massCategoryId: string | null;
   originalKey: string | null;
   status: SongStatus;
   version: number;
@@ -22,7 +24,7 @@ export async function fetchAdminSongs(): Promise<AdminSongRow[]> {
   const { data, error } = await supabase
     .from("eac_songs")
     .select(
-      "id, number, title, slug, collection, original_key, status, version, updated_at, category:eac_song_categories(name)"
+      "id, number, title, slug, collection, available_for_mass, mass_category_id, original_key, status, version, updated_at, category:eac_song_categories(name)"
     )
     .order("updated_at", { ascending: false });
   if (error) throw error;
@@ -33,6 +35,8 @@ export async function fetchAdminSongs(): Promise<AdminSongRow[]> {
     slug: row.slug,
     collection: row.collection,
     categoryName: row.category?.name ?? null,
+    availableForMass: Boolean(row.available_for_mass) || row.collection === "MISSA",
+    massCategoryId: row.mass_category_id ?? null,
     originalKey: row.original_key,
     status: row.status,
     version: row.version,
@@ -104,6 +108,8 @@ export interface SongInput {
   slug: string;
   collection: Collection;
   categoryId: string | null;
+  availableForMass?: boolean;
+  massCategoryId?: string | null;
   originalKey: string | null;
   sourceText: string;
   normalizedLines: unknown;
@@ -124,6 +130,8 @@ export async function insertSong(input: SongInput): Promise<string> {
       slug: input.slug,
       collection: input.collection,
       category_id: input.categoryId,
+      available_for_mass: input.collection === "MISSA" ? true : Boolean(input.availableForMass),
+      mass_category_id: input.collection === "EAC" && input.availableForMass ? (input.massCategoryId ?? null) : null,
       original_key: input.originalKey,
       source_text: input.sourceText,
       normalized_lines: input.normalizedLines,
@@ -164,6 +172,8 @@ export async function updateExistingSong(id: string, input: SongInput): Promise<
       title: input.title,
       collection: input.collection,
       category_id: input.categoryId,
+      available_for_mass: input.collection === "MISSA" ? true : Boolean(input.availableForMass),
+      mass_category_id: input.collection === "EAC" && input.availableForMass ? (input.massCategoryId ?? null) : null,
       original_key: input.originalKey,
       source_text: input.sourceText,
       normalized_lines: input.normalizedLines,
@@ -178,6 +188,23 @@ export async function updateExistingSong(id: string, input: SongInput): Promise<
   if (input.collection === "EAC" && input.status === "PUBLISHED") {
     await renumberPublishedEacSongs();
   }
+}
+
+
+export async function setSongMassAvailability(
+  id: string,
+  available: boolean,
+  massCategoryId: string | null = null
+): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("eac_songs")
+    .update({
+      available_for_mass: available,
+      mass_category_id: available ? massCategoryId : null,
+    })
+    .eq("id", id);
+  if (error) throw error;
 }
 
 export async function setSongStatus(id: string, status: SongStatus): Promise<void> {
