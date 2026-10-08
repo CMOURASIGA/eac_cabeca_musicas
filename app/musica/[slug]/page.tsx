@@ -203,7 +203,7 @@ export default function SongPage({ params }: { params: { slug: string } }) {
   return (
     <div className="mx-auto w-full max-w-3xl min-w-0 overflow-x-hidden flex flex-col min-h-[calc(100dvh-57px)]">
       {/* Cabeçalho: título bem claro, sem disputar espaço com controles */}
-      <div className="flex min-w-0 items-center gap-2.5 px-3 sm:px-4 pt-3 pb-2 bg-white dark:bg-dark-surface sticky top-[57px] z-10">
+      <div className="flex min-w-0 items-center gap-2.5 px-3 sm:px-4 pt-3 pb-2 bg-white dark:bg-dark-surface sticky top-0 sm:top-[57px] z-20">
         <Link
           href={song.collection === "EAC" ? "/livro-eac" : "/missa"}
           aria-label="Voltar"
@@ -238,7 +238,7 @@ export default function SongPage({ params }: { params: { slug: string } }) {
       )}
 
       {/* Barra principal: tom, transposição, favoritar e seleção — grandes, uma mão só */}
-      <div className="grid grid-cols-[auto_auto_auto_1fr] sm:flex items-center gap-2 px-3 sm:px-4 pb-3 border-b border-border bg-white dark:bg-dark-surface dark:border-dark-border sticky top-[105px] z-10">
+      <div className="grid grid-cols-[auto_auto_auto_1fr] sm:flex items-center gap-2 px-3 sm:px-4 pb-3 border-b border-border bg-white dark:bg-dark-surface dark:border-dark-border sticky top-[63px] sm:top-[105px] z-20">
         <button
           onClick={() => setSemitones((s) => s - 1)}
           aria-label="Transpor um tom abaixo"
@@ -349,10 +349,10 @@ export default function SongPage({ params }: { params: { slug: string } }) {
         </div>
       </div>
 
-      <div className="flex min-w-0 items-center gap-2.5 px-3 sm:px-4 py-2.5 border-t border-border bg-white dark:bg-dark-surface dark:border-dark-border">
+      <div className="sticky bottom-0 z-20 flex min-w-0 items-center gap-2.5 border-t border-border bg-[#0F1B33] px-3 sm:px-4 py-3 text-white shadow-[0_-8px_30px_rgba(15,27,51,0.12)] dark:border-dark-border sm:bg-white sm:text-ink dark:sm:bg-dark-surface">
         <button
           onClick={() => setPlaying((p) => !p)}
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-eac text-white"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/15 text-white sm:bg-eac"
           aria-label={playing ? "Pausar rolagem" : "Iniciar rolagem automática"}
         >
           {playing ? "❚❚" : "▶"}
@@ -363,9 +363,9 @@ export default function SongPage({ params }: { params: { slug: string } }) {
           max={SPEED_STEPS.length - 1}
           value={speedIndex}
           onChange={(e) => setSpeedIndex(Number(e.target.value))}
-          className="min-w-0 flex-1 accent-eac"
+          className="min-w-0 flex-1 accent-gold"
         />
-        <span className="text-[11px] font-semibold text-ink-soft shrink-0">Vel. {SPEED_STEPS[speedIndex]}x</span>
+        <span className="text-[11px] font-semibold text-white/80 sm:text-ink-soft shrink-0">Vel. {SPEED_STEPS[speedIndex]}x</span>
       </div>
 
       <div className="flex gap-2.5 overflow-x-auto px-4 py-3 border-t border-border bg-paper-alt dark:bg-dark-surface dark:border-dark-border">
