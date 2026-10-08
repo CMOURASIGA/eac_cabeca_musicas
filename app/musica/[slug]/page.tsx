@@ -201,9 +201,9 @@ export default function SongPage({ params }: { params: { slug: string } }) {
   }
 
   return (
-    <div className="mx-auto max-w-3xl flex flex-col min-h-[calc(100dvh-57px)]">
+    <div className="mx-auto w-full max-w-3xl min-w-0 overflow-x-hidden flex flex-col min-h-[calc(100dvh-57px)]">
       {/* Cabeçalho: título bem claro, sem disputar espaço com controles */}
-      <div className="flex items-center gap-3 px-4 pt-3 pb-2 bg-white dark:bg-dark-surface sticky top-[57px] z-10">
+      <div className="flex min-w-0 items-center gap-2.5 px-3 sm:px-4 pt-3 pb-2 bg-white dark:bg-dark-surface sticky top-[57px] z-10">
         <Link
           href={song.collection === "EAC" ? "/livro-eac" : "/missa"}
           aria-label="Voltar"
@@ -218,7 +218,7 @@ export default function SongPage({ params }: { params: { slug: string } }) {
                 {song.number}
               </span>
             )}
-            <h1 className="font-serif text-lg font-bold truncate leading-tight">{song.title}</h1>
+            <h1 className="min-w-0 font-serif text-[17px] sm:text-lg font-bold truncate leading-tight">{song.title}</h1>
           </div>
           <p className="text-[11px] text-ink-soft dark:text-ink-faint">
             {song.collection === "EAC" ? "Livro EAC" : "Músicas de Missa"}
@@ -238,16 +238,16 @@ export default function SongPage({ params }: { params: { slug: string } }) {
       )}
 
       {/* Barra principal: tom, transposição, favoritar e seleção — grandes, uma mão só */}
-      <div className="flex items-center gap-2.5 px-4 pb-3 border-b border-border bg-white dark:bg-dark-surface dark:border-dark-border sticky top-[105px] z-10">
+      <div className="grid grid-cols-[auto_auto_auto_1fr] sm:flex items-center gap-2 px-3 sm:px-4 pb-3 border-b border-border bg-white dark:bg-dark-surface dark:border-dark-border sticky top-[105px] z-10">
         <button
           onClick={() => setSemitones((s) => s - 1)}
           aria-label="Transpor um tom abaixo"
-          className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border-2 border-eac text-2xl font-bold text-eac active:scale-95 transition-transform dark:border-white dark:text-white"
+          className="grid h-11 w-11 sm:h-12 sm:w-12 shrink-0 place-items-center rounded-2xl border-2 border-eac text-xl sm:text-2xl font-bold text-eac active:scale-95 transition-transform dark:border-white dark:text-white"
         >
           −
         </button>
-        <div className="flex flex-col items-center justify-center px-1 min-w-[52px]">
-          <span className="font-serif text-2xl font-extrabold leading-none text-eac dark:text-white">{currentKey}</span>
+        <div className="flex flex-col items-center justify-center px-1 min-w-[48px] sm:min-w-[52px]">
+          <span className="font-serif text-xl sm:text-2xl font-extrabold leading-none text-eac dark:text-white">{currentKey}</span>
           <span className="text-[9px] uppercase tracking-wide text-ink-faint mt-0.5">tom atual</span>
         </div>
         <button
@@ -267,12 +267,12 @@ export default function SongPage({ params }: { params: { slug: string } }) {
           </button>
         )}
 
-        <div className="ml-auto flex items-center gap-1.5 shrink-0">
+        <div className="ml-auto flex min-w-0 items-center justify-end gap-1 shrink-0">
           <button
             onClick={toggleFavorite}
             aria-label={favorites.has(song.id) ? "Remover dos favoritos" : "Favoritar"}
             aria-pressed={favorites.has(song.id)}
-            className={`grid h-11 w-11 place-items-center rounded-full border-2 text-xl transition-transform ${
+            className={`grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full border-2 text-xl transition-transform ${
               favPulse ? "animate-[eac-pop_0.32s_ease]" : ""
             } ${favorites.has(song.id) ? "border-red text-red" : "border-border text-ink-faint"}`}
           >
@@ -282,7 +282,7 @@ export default function SongPage({ params }: { params: { slug: string } }) {
             onClick={toggleSelection}
             aria-label={selection.has(song.id) ? "Remover da seleção" : "Adicionar à seleção"}
             aria-pressed={selection.has(song.id)}
-            className={`grid h-11 w-11 place-items-center rounded-full border-2 text-lg font-bold transition-transform ${
+            className={`grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full border-2 text-lg font-bold transition-transform ${
               selPulse ? "animate-[eac-pop_0.32s_ease]" : ""
             } ${selection.has(song.id) ? "border-eac bg-eac text-white" : "border-border text-ink-faint"}`}
           >
@@ -292,7 +292,7 @@ export default function SongPage({ params }: { params: { slug: string } }) {
             onClick={() => setMenuOpen((v) => !v)}
             aria-label="Mais opções"
             aria-expanded={menuOpen}
-            className={`grid h-11 w-11 place-items-center rounded-full border-2 text-lg ${
+            className={`grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full border-2 text-lg ${
               menuOpen ? "border-eac text-eac" : "border-border text-ink-faint"
             }`}
           >
@@ -349,7 +349,7 @@ export default function SongPage({ params }: { params: { slug: string } }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 px-4 py-2.5 border-t border-border bg-white dark:bg-dark-surface dark:border-dark-border">
+      <div className="flex min-w-0 items-center gap-2.5 px-3 sm:px-4 py-2.5 border-t border-border bg-white dark:bg-dark-surface dark:border-dark-border">
         <button
           onClick={() => setPlaying((p) => !p)}
           className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-eac text-white"
@@ -363,7 +363,7 @@ export default function SongPage({ params }: { params: { slug: string } }) {
           max={SPEED_STEPS.length - 1}
           value={speedIndex}
           onChange={(e) => setSpeedIndex(Number(e.target.value))}
-          className="flex-1 accent-eac"
+          className="min-w-0 flex-1 accent-eac"
         />
         <span className="text-[11px] font-semibold text-ink-soft shrink-0">Vel. {SPEED_STEPS[speedIndex]}x</span>
       </div>
