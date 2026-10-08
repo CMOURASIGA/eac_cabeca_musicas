@@ -69,6 +69,35 @@ export async function fetchCategoriesAll(): Promise<CategoryRow[]> {
   return data ?? [];
 }
 
+const titleCollator = new Intl.Collator("pt-BR", {
+  sensitivity: "base",
+  numeric: true,
+});
+
+async function renumberPublishedEacSongs(): Promise<void> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("eac_songs")
+    .select("id, title")
+    .eq("collection", "EAC")
+    .eq("status", "PUBLISHED");
+
+  if (error) throw error;
+
+  const ordered = [...(data ?? [])].sort((a: any, b: any) =>
+    titleCollator.compare(String(a?.title ?? ""), String(b?.title ?? ""))
+  );
+
+  for (let index = 0; index < ordered.length; index += 1) {
+    const { error: updateError } = await supabase
+      .from("eac_songs")
+      .update({ number: index + 1 })
+      .eq("id", ordered[index].id);
+
+    if (updateError) throw updateError;
+  }
+}
+
 export interface SongInput {
   number: number | null;
   title: string;
@@ -108,6 +137,9 @@ export async function insertSong(input: SongInput): Promise<string> {
     .select("id")
     .single();
   if (error) throw error;
+  if (input.collection === "EAC" && input.status === "PUBLISHED") {
+    await renumberPublishedEacSongs();
+  }
   return data.id as string;
 }
 
@@ -143,6 +175,9 @@ export async function updateExistingSong(id: string, input: SongInput): Promise<
     })
     .eq("id", id);
   if (error) throw error;
+  if (input.collection === "EAC" && input.status === "PUBLISHED") {
+    await renumberPublishedEacSongs();
+  }
 }
 
 export async function setSongStatus(id: string, status: SongStatus): Promise<void> {
@@ -152,6 +187,7 @@ export async function setSongStatus(id: string, status: SongStatus): Promise<voi
     .update({ status, published_at: status === "PUBLISHED" ? new Date().toISOString() : null })
     .eq("id", id);
   if (error) throw error;
+  await renumberPublishedEacSongs();
 }
 
 /** Muda o status de várias músicas de uma vez (ex: publicar todos os rascunhos selecionados). */
@@ -163,6 +199,7 @@ export async function setSongsStatusBulk(ids: string[], status: SongStatus): Pro
     .update({ status, published_at: status === "PUBLISHED" ? new Date().toISOString() : null })
     .in("id", ids);
   if (error) throw error;
+  await renumberPublishedEacSongs();
 }
 
 // ── rastreabilidade da importação (import_jobs / import_items) ───────────
