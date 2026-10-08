@@ -16,6 +16,8 @@ export interface EacSongRow {
   slug: string;
   collection: Collection;
   category_id: string | null;
+  available_for_mass: boolean;
+  mass_category_id: string | null;
   original_key: string | null;
   source_text: string;
   normalized_lines: unknown;
