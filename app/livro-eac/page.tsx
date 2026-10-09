@@ -30,15 +30,15 @@ function CatalogEAC() {
         .filter(
           (s) =>
             (category === "Todas" || s.category === category) &&
-            (matchesQuery(s.title, query) || matchesQuery(s.sourceText, query) || String(s.number ?? "").includes(query))
+            (matchesQuery(s.title, query) || String(s.number ?? "").includes(query))
         )
         .sort((a, b) => titleCollator.compare(a.title, b.title)),
     [songs, query, category]
   );
 
   return (
-    <div className="mx-auto w-full max-w-3xl min-w-0 overflow-x-hidden px-3 sm:px-4 py-5 sm:py-6 space-y-4 sm:space-y-5">
-      <div className="rounded-2xl p-4 sm:p-5 text-white" style={{ background: "#0F1B33" }}>
+    <div className="mx-auto w-full max-w-3xl min-w-0 overflow-x-hidden px-3 sm:px-4 py-5 pb-24 sm:py-6 sm:pb-6 space-y-4 sm:space-y-5">
+      <div className="rounded-[24px] p-5 text-white shadow-sm" style={{ background: "linear-gradient(135deg,#0F1B33 0%,#091126 100%)" }}>
         <h1 className="font-serif text-xl font-semibold">Livro EAC</h1>
         <p className="text-sm opacity-85">{songs.length} música(s) publicada(s) · Cabeça</p>
       </div>
@@ -49,7 +49,7 @@ function CatalogEAC() {
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Buscar título, número ou letra"
+        placeholder="Buscar por título ou número"
         className="w-full min-w-0 rounded-xl border border-border bg-white px-3 sm:px-4 py-3 text-sm outline-none"
       />
 

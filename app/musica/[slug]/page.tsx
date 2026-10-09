@@ -201,13 +201,12 @@ export default function SongPage({ params }: { params: { slug: string } }) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl min-w-0 overflow-x-hidden flex flex-col min-h-[calc(100dvh-57px)]">
-      {/* Cabeçalho: título bem claro, sem disputar espaço com controles */}
-      <div className="flex min-w-0 items-center gap-2.5 px-3 sm:px-4 pt-3 pb-2 bg-white dark:bg-dark-surface sticky top-[57px] z-10">
+    <div className="mx-auto flex min-h-screen w-full max-w-3xl min-w-0 flex-col overflow-x-hidden bg-[#FFFDF7]">
+      <div className="sticky top-0 z-30 flex min-w-0 items-center gap-3 border-b border-border/70 bg-[#FFFDF7]/95 px-3 py-3 backdrop-blur sm:top-[57px] sm:px-4">
         <Link
           href={song.collection === "EAC" ? "/livro-eac" : "/missa"}
           aria-label="Voltar"
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-border text-lg"
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-border bg-white text-xl text-eac shadow-sm"
         >
           ←
         </Link>
@@ -218,7 +217,7 @@ export default function SongPage({ params }: { params: { slug: string } }) {
                 {song.number}
               </span>
             )}
-            <h1 className="min-w-0 font-serif text-[17px] sm:text-lg font-bold truncate leading-tight">{song.title}</h1>
+            <h1 className="min-w-0 truncate font-serif text-[22px] font-bold leading-tight text-eac sm:text-2xl">{song.title}</h1>
           </div>
           <p className="text-[11px] text-ink-soft dark:text-ink-faint">
             {song.collection === "EAC" ? "Livro EAC" : "Músicas de Missa"}
@@ -237,69 +236,61 @@ export default function SongPage({ params }: { params: { slug: string } }) {
         </div>
       )}
 
-      {/* Barra principal: tom, transposição, favoritar e seleção — grandes, uma mão só */}
-      <div className="grid grid-cols-[auto_auto_auto_1fr] sm:flex items-center gap-2 px-3 sm:px-4 pb-3 border-b border-border bg-white dark:bg-dark-surface dark:border-dark-border sticky top-[105px] z-10">
+      <section className="px-4 pt-5 sm:px-6">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 rounded-[24px] border border-border bg-white p-4 shadow-sm">
         <button
           onClick={() => setSemitones((s) => s - 1)}
           aria-label="Transpor um tom abaixo"
-          className="grid h-11 w-11 sm:h-12 sm:w-12 shrink-0 place-items-center rounded-2xl border-2 border-eac text-xl sm:text-2xl font-bold text-eac active:scale-95 transition-transform dark:border-white dark:text-white"
+          className="justify-self-start grid h-14 w-14 shrink-0 place-items-center rounded-2xl border-2 border-eac bg-white text-3xl font-bold text-eac shadow-sm active:scale-95 transition-transform"
         >
           −
         </button>
-        <div className="flex flex-col items-center justify-center px-1 min-w-[48px] sm:min-w-[52px]">
-          <span className="font-serif text-xl sm:text-2xl font-extrabold leading-none text-eac dark:text-white">{currentKey}</span>
-          <span className="text-[9px] uppercase tracking-wide text-ink-faint mt-0.5">tom atual</span>
+        <div className="flex min-w-[90px] flex-col items-center justify-center">
+          <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-ink-faint">Tom atual</span>
+          <span className="mt-1 rounded-2xl bg-paper px-5 py-2 font-serif text-3xl font-extrabold leading-none text-eac">{currentKey}</span>
         </div>
         <button
           onClick={() => setSemitones((s) => s + 1)}
           aria-label="Transpor um tom acima"
-          className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border-2 border-eac text-2xl font-bold text-eac active:scale-95 transition-transform dark:border-white dark:text-white"
+          className="justify-self-end grid h-14 w-14 shrink-0 place-items-center rounded-2xl border-2 border-eac bg-white text-3xl font-bold text-eac shadow-sm active:scale-95 transition-transform"
         >
           +
         </button>
 
-        {semitones !== 0 && (
-          <button
-            onClick={() => setSemitones(0)}
-            className="shrink-0 flex items-center gap-1 rounded-full bg-gold-soft border border-gold px-2.5 py-1.5 text-[11px] font-bold text-gold-deep"
-          >
-            ↺ Original ({song.originalKey})
-          </button>
-        )}
+        </div>
 
-        <div className="ml-auto flex min-w-0 items-center justify-end gap-1 shrink-0">
-          <button
-            onClick={toggleFavorite}
-            aria-label={favorites.has(song.id) ? "Remover dos favoritos" : "Favoritar"}
-            aria-pressed={favorites.has(song.id)}
-            className={`grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full border-2 text-xl transition-transform ${
-              favPulse ? "animate-[eac-pop_0.32s_ease]" : ""
-            } ${favorites.has(song.id) ? "border-red text-red" : "border-border text-ink-faint"}`}
-          >
-            {favorites.has(song.id) ? "♥" : "♡"}
+        <div className="mt-3 grid grid-cols-3 gap-2 rounded-[20px] border border-border bg-white p-2 shadow-sm">
+          <button onClick={() => adjustFont(1)} className="rounded-xl px-2 py-2.5 text-center">
+            <span className="block font-serif text-xl font-black text-eac">A</span>
+            <span className="block text-[10px] font-bold text-ink-soft">Fonte</span>
           </button>
-          <button
-            onClick={toggleSelection}
-            aria-label={selection.has(song.id) ? "Remover da seleção" : "Adicionar à seleção"}
-            aria-pressed={selection.has(song.id)}
-            className={`grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full border-2 text-lg font-bold transition-transform ${
-              selPulse ? "animate-[eac-pop_0.32s_ease]" : ""
-            } ${selection.has(song.id) ? "border-eac bg-eac text-white" : "border-border text-ink-faint"}`}
-          >
-            {selection.has(song.id) ? "✓" : "+"}
+          <button onClick={() => setPlaying((p) => !p)} className="rounded-xl px-2 py-2.5 text-center">
+            <span className="block text-xl text-eac">{playing ? "❚❚" : "▶"}</span>
+            <span className="block text-[10px] font-bold text-ink-soft">Auto Scroll</span>
           </button>
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Mais opções"
-            aria-expanded={menuOpen}
-            className={`grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full border-2 text-lg ${
-              menuOpen ? "border-eac text-eac" : "border-border text-ink-faint"
-            }`}
-          >
-            ⋯
+          <button onClick={toggleFullscreen} className="rounded-xl px-2 py-2.5 text-center">
+            <span className="block text-xl text-eac">⛶</span>
+            <span className="block text-[10px] font-bold text-ink-soft">Modo tocar</span>
           </button>
         </div>
-      </div>
+
+        <div className="mt-3 flex items-center justify-between">
+          {semitones !== 0 ? (
+            <button onClick={() => setSemitones(0)} className="rounded-full bg-gold-soft px-3 py-2 text-xs font-bold text-gold-deep">
+              ↺ Original ({song.originalKey})
+            </button>
+          ) : <span />}
+          <div className="flex items-center gap-2">
+            <button onClick={toggleFavorite} className={`grid h-10 w-10 place-items-center rounded-full border text-lg ${favorites.has(song.id) ? "border-red text-red" : "border-border text-ink-faint"}`}>
+              {favorites.has(song.id) ? "♥" : "♡"}
+            </button>
+            <button onClick={toggleSelection} className={`grid h-10 w-10 place-items-center rounded-full border text-lg font-bold ${selection.has(song.id) ? "border-eac bg-eac text-white" : "border-border text-ink-faint"}`}>
+              {selection.has(song.id) ? "✓" : "+"}
+            </button>
+            <button onClick={() => setMenuOpen((v) => !v)} className="grid h-10 w-10 place-items-center rounded-full border border-border text-lg text-ink-faint">⋯</button>
+          </div>
+        </div>
+      </section>
 
       {/* Controles secundários: escondidos por padrão pra não disputar atenção durante a execução */}
       {menuOpen && (
@@ -324,8 +315,8 @@ export default function SongPage({ params }: { params: { slug: string } }) {
         </div>
       )}
 
-      <div ref={scrollRef} className="flex-1 min-w-0 w-full max-w-full overflow-y-auto overflow-x-hidden chord-scroll px-3 sm:px-4 py-5">
-        <div className="font-mono leading-[1.75] w-full max-w-full" style={{ fontSize }}>
+      <div ref={scrollRef} className="chord-scroll mt-4 min-w-0 w-full max-w-full flex-1 overflow-y-auto overflow-x-hidden px-3 pb-28 sm:px-5">
+        <div className="w-full max-w-full rounded-[24px] border border-border/80 bg-white px-4 py-5 font-mono leading-[1.9] shadow-[0_6px_24px_rgba(15,27,51,0.05)] sm:px-6" style={{ fontSize }}>
           {parsed.lines.map((line, i) => {
             if (line.type === "blank") return <div key={i} className="h-4" />;
             if (line.type === "section")
@@ -349,10 +340,10 @@ export default function SongPage({ params }: { params: { slug: string } }) {
         </div>
       </div>
 
-      <div className="flex min-w-0 items-center gap-2.5 px-3 sm:px-4 py-2.5 border-t border-border bg-white dark:bg-dark-surface dark:border-dark-border">
+      <div className="fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-3xl min-w-0 items-center gap-3 bg-[#0F1B33] px-4 py-3 text-white shadow-[0_-10px_32px_rgba(15,27,51,0.18)] sm:sticky">
         <button
           onClick={() => setPlaying((p) => !p)}
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-eac text-white"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/15 text-white sm:bg-eac"
           aria-label={playing ? "Pausar rolagem" : "Iniciar rolagem automática"}
         >
           {playing ? "❚❚" : "▶"}
@@ -363,9 +354,9 @@ export default function SongPage({ params }: { params: { slug: string } }) {
           max={SPEED_STEPS.length - 1}
           value={speedIndex}
           onChange={(e) => setSpeedIndex(Number(e.target.value))}
-          className="min-w-0 flex-1 accent-eac"
+          className="min-w-0 flex-1 accent-gold"
         />
-        <span className="text-[11px] font-semibold text-ink-soft shrink-0">Vel. {SPEED_STEPS[speedIndex]}x</span>
+        <span className="text-[11px] font-semibold text-white/80 sm:text-ink-soft shrink-0">Vel. {SPEED_STEPS[speedIndex]}x</span>
       </div>
 
       <div className="flex gap-2.5 overflow-x-auto px-4 py-3 border-t border-border bg-paper-alt dark:bg-dark-surface dark:border-dark-border">

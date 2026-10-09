@@ -8,6 +8,8 @@ export interface UiSong {
   slug: string;
   collection: Collection;
   category: string;
+  availableForMass?: boolean;
+  massCategory?: string | null;
   originalKey: string;
   version: string;
   updatedAt: string;
@@ -22,6 +24,8 @@ export function sampleSongToUiSong(s: SampleSong): UiSong {
     slug: s.slug,
     collection: s.collection,
     category: s.category,
+    availableForMass: s.collection === "MISSA",
+    massCategory: s.collection === "MISSA" ? s.category : null,
     originalKey: s.originalKey,
     version: s.version,
     updatedAt: s.updatedAt,
